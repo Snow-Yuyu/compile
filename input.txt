@@ -1,27 +1,48 @@
-/* This is a comprehensive test file for Lexical Analyzer 
-   包含多行注释测试
+/* 轻量级仓颉词法分析器 - 终极综合测试用例
+  包含：所有合法的单词类别、大小写敏感测试、下划线、单/多行注释以及非法字符报错
 */
 
-int main() {
-    int a = 10;
-    int b = 20;
-    int sum_result = a + b;
+main() {
+    // 1. 变量声明与基础数据类型 (测试关键字、标识符、界符冒号)
+    var _num_1: int = 100;
+    let MAX_VALUE = 999;
+    
+    // 2. 严格区分大小写测试 (仓颉中关键字必须全小写)
+    var IF: int = 1;     // IF 应该是普通标识符 (ID)
+    var Let_var = 2;     // Let_var 应该是普通标识符 (ID)
+    
+    // 3. 数组与界符测试
+    var arr[5];
 
-    read(a);
-
-    if (sum_result >= 30) {
-        write(sum_result);
+    // 4. 各种算术与关系运算符测试 (测试前瞻 Lookahead 机制)
+    if (_num_1 >= 50) {
+        _num_1 = _num_1 + 10 * 2 / 4 - 1;
     } else {
-        while (a < b) {
-            a = a + 1;
-            if (a == 15) {
-                continue;
-            }
-            if (a != 20) {
+        while (MAX_VALUE != 0) {
+            if (MAX_VALUE <= 500) {
                 break;
             }
+            MAX_VALUE = MAX_VALUE - 1;
         }
     }
 
+    // 5. 更多轻量级仓颉关键字测试
+    func test_match() {
+        match (IF) {
+            case 1: 
+                write(IF);
+            case 2: 
+                read(Let_var);
+        }
+    }
+
+    // ==========================================
+    // 6. 故意制造的词法错误 (测试程序的报错与恢复机制)
+    // ==========================================
+    
+    @                  // 错误 1：程序完全不认识的非法字符
+    
+    var error_test = 123a; // 错误 2：数字后面紧跟字母，违背数字和标识符的构造规则
+    
     return 0;
 }
