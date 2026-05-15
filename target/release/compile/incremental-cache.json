@@ -1,0 +1,14 @@
+{
+  "packageInformation": {
+    "compile": {
+      "rootPackageName": "compile",
+      "fileNameHash": "-7047780326830174602",
+      "timeStamp": 1781333130,
+      "isBuilt": true,
+      "exeName": "main",
+      "hasSubPkgs": false
+    }
+  },
+  "jsonHash": "8142847323256069076",
+  "rootPackageName": "compile"
+}

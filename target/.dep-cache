@@ -1,0 +1,37 @@
+{
+  "bin": {},
+  "pkg-build": {
+    "D:\\Astudy\\code\\compile\\src": {
+      "package": "compile",
+      "isMacro": false,
+      "accessLevel": "public",
+      "timeStamp": 1781333057,
+      "dependencies": [],
+      "std-dependencies": [
+        {
+          "orPackage": "",
+          "package": "std.console",
+          "isStd": true,
+          "imports": [
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test1.cj"
+            }
+          ]
+        },
+        {
+          "orPackage": "",
+          "package": "std.fs",
+          "isStd": true,
+          "imports": [
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test1.cj"
+            }
+          ]
+        }
+      ],
+      "testUsed": false,
+      "mockUsed": false
+    }
+  },
+  "pkg-test": {}
+}

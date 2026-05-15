@@ -1,0 +1,27 @@
+/* This is a comprehensive test file for Lexical Analyzer 
+   包含多行注释测试
+*/
+
+int main() {
+    int a = 10;
+    int b = 20;
+    int sum_result = a + b;
+
+    read(a);
+
+    if (sum_result >= 30) {
+        write(sum_result);
+    } else {
+        while (a < b) {
+            a = a + 1;
+            if (a == 15) {
+                continue;
+            }
+            if (a != 20) {
+                break;
+            }
+        }
+    }
+
+    return 0;
+}

@@ -1,0 +1,19 @@
+{
+	"CangjieSdk.Option": "CJNative",
+	"editor.gotoLocation.alternativeDeclarationCommand": "editor.action.revealDefinition",
+	"editor.gotoLocation.alternativeDefinitionCommand": "editor.action.revealDefinition",
+	"editor.gotoLocation.alternativeTypeDefinitionCommand": "editor.action.revealDefinition",
+	"editor.selectionHighlight": false,
+	"files.autoSave": "onFocusChange",
+	"editor.suggest.snippetsPreventQuickSuggestions": false,
+	"editor.quickSuggestions": {
+		"other": "on",
+		"comments": "off",
+		"strings": "on"
+	},
+	"terminal.integrated.env.windows": {
+		"CANGJIE_HOME": "D:\\Astudy\\编译原理\\实验\\Cangjie",
+		"CANGJIE_PATH": "D:\\Astudy\\编译原理\\实验\\Cangjie\\runtime\\lib\\windows_x86_64_cjnative;D:\\Astudy\\编译原理\\实验\\Cangjie\\bin;D:\\Astudy\\编译原理\\实验\\Cangjie\\tools\\bin;D:\\Astudy\\编译原理\\实验\\Cangjie\\tools\\lib;C:\\Users\\21266\\.cjpm\\bin",
+		"PATH": "${config:terminal.integrated.env.windows.CANGJIE_PATH};${env:PATH}"
+	}
+}
