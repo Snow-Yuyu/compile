@@ -6,4 +6,84 @@ warning[0m: unused import 'std.console.*'
   | 
   # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-1 warning generated, 1 warning printed.
+warning[0m: unused import 'std.collection.*'
+ ==> D:\Astudy\code\compile\src\test1.cj:4:1:
+  | 
+4 | import std.collection.*
+  | ^^^^^^^^^^^^^^^^^^^^^^^ unused import
+  | 
+  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:117:38:
+    | 
+117 |     private func parse_function_body(assert!: Bool = true): Bool{
+    |                                      ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:121:41:
+    | 
+121 |     private func parse_declaration_list(assert!: Bool = true): Bool{
+    |                                         ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:145:32:
+    | 
+145 |     private func parse_epsilon(assert!: Bool = true): Bool{ return true }
+    |                                ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:147:39:
+    | 
+147 |     private func parse_statement_list(assert!: Bool = true): Bool{
+    |                                       ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:285:34:
+    | 
+285 |     private func parse_bool_expr(assert!: Bool = true): Bool{
+    |                                  ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:306:38:
+    | 
+306 |     private func parse_additive_expr(assert!: Bool = true): Bool{
+    |                                      ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:324:29:
+    | 
+324 |     private func parse_term(assert!: Bool = true): Bool{
+    |                             ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'cogen'
+   ==> D:\Astudy\code\compile\src\test2.cj:371:58:
+    | 
+371 |     private func term(tok: String, assert!: Bool = true, cogen!: Bool = true): Bool{
+    |                                                          ^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'cogen'
+   ==> D:\Astudy\code\compile\src\test2.cj:393:83:
+    | 
+393 |     private func cat(lexeme: Int64, assert!: Bool = true, check_id!: Bool = true, cogen!: Bool = true): Bool{
+    |                                                                                   ^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+11 warnings generated, 11 warnings printed.

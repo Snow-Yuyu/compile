@@ -5,9 +5,22 @@
       "package": "compile",
       "isMacro": false,
       "accessLevel": "public",
-      "timeStamp": 1781333057,
+      "timeStamp": 1781333498,
       "dependencies": [],
       "std-dependencies": [
+        {
+          "orPackage": "",
+          "package": "std.collection",
+          "isStd": true,
+          "imports": [
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test1.cj"
+            },
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test2.cj"
+            }
+          ]
+        },
         {
           "orPackage": "",
           "package": "std.console",
@@ -25,6 +38,9 @@
           "imports": [
             {
               "file": "D:\\Astudy\\code\\compile\\src\\test1.cj"
+            },
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test2.cj"
             }
           ]
         }
