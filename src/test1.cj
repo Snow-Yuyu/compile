@@ -118,7 +118,7 @@ class Lexer {
                     token_cnt++
                     read_next()
                 } else {
-                    results[token_cnt] = Token(3, op, this.line) // 修正类别：操作符映射为3
+                    results[token_cnt] = Token(3, op, this.line) 
                     token_cnt++
                 }
                 continue
@@ -221,9 +221,7 @@ class Lexer {
     private func is_slash(ch: Rune): Bool { return ch == r'/' }
 }
 
-// ✨ 全新重构的主函数
 main() {
-    // 1. 定义好输入和输出的文件路径
     let src_path = "D:/Astudy/code/compile/input.txt"          
     let lex_out_path = "D:/Astudy/code/compile/token_out.txt"   
     let parse_out_path = "D:/Astudy/code/compile/pcode_out.txt" 
@@ -236,27 +234,22 @@ main() {
     let src_runes = reader.get_program()
     if (src_runes.size == 0) { return }
 
-    // 2. 启动词法分析器，直接拿到它返回的 10000 大小的原始数组
     var myLexer = Lexer(src_runes, lex_out_path)
     let tokens_raw = myLexer.run()
-    myLexer.writetofile() // 依旧保留写入文件功能，方便你提交实验报告查看
+    myLexer.writetofile()
 
-    println("\n[步骤 3] 主函数正在智能清点有效 Token 数量...")
-    // 3. ✨ 纯主函数超级大招：
-    // 不读取文件、不触碰私有变量。直接遍历返回值，遇到未初始化的占位符（line为0）就停止
+    // 智能清点有效 Token 长度，防止 10000 数组空间的尾部空结构体污染 Parser 计数
     var valid_token_count: Int64 = 0
-    for (t in tokens_raw) {
-        if (t.line == 0) {
-            break // 戳到未使用的缓冲区尾巴了，直接退出循环
+    for (i in 0..10000) {
+        if (tokens_raw[i].line == 0) {
+            break 
         }
         valid_token_count++
     }
 
-    // 4. 依照清点出的精准数量，裁剪出完美尺寸的紧凑数组喂给后方
     var precise_tokens = Array<Token>(valid_token_count, { i => tokens_raw[i] })
     println("  └─ ✓ 成功在主函数内部清点出有效 Token 数量: ${valid_token_count} 个\n")
 
-    // 5. 无缝拉起语法分析器
     println("[Parser] 正在启动语法与语义分析器...")
     var myParser = parser2(precise_tokens, valid_token_count, parse_out_path)
     myParser.run()
