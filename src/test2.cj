@@ -4,41 +4,45 @@ import std.collection.*
 import std.fs.*
 
 // ==========================================
-// 1. 抽象语法树节点字典
+// 1. 抽象语法树节点字典 (纯语法版，满血复活)
 // ==========================================
 class NodeType {
     public static let Program = 1
     public static let MainDecl = 2
     public static let Block = 3
     public static let VarDecl = 4
-    public static let ArrayDecl = 5     // 数组声明
+    public static let ArrayDecl = 5     
     public static let Assign = 6
-    public static let ArrayAssign = 7   // 数组赋值
+    public static let ArrayAssign = 7   
     public static let IfStat = 8
     public static let ReadStat = 9
     public static let WriteStat = 10
     public static let BinOp = 11
     public static let Identifier = 12
-    public static let ArrayAccess = 13  // 数组访问
+    public static let ArrayAccess = 13  
     public static let Number = 14
+    public static let WhileStat = 15    // ✨ 加回：While 循环
+    public static let ForStat = 16      // ✨ 加回：For 循环
     public static let ErrorNode = 0 
     
     public static func toString(node_type: Int64): String {
-        if (node_type == 1) { return "Program (程序)" }
-        if (node_type == 2) { return "MainDecl (主函数)" }
-        if (node_type == 3) { return "Block (代码块)" }
-        if (node_type == 4) { return "VarDecl (变量声明)" }
-        if (node_type == 5) { return "ArrayDecl (数组声明)" }
-        if (node_type == 6) { return "Assign (赋值)" }
-        if (node_type == 7) { return "ArrayAssign (数组赋值)" }
-        if (node_type == 8) { return "IfStat (条件)" }
-        if (node_type == 9) { return "ReadStat (读取)" }
-        if (node_type == 10) { return "WriteStat (输出)" }
-        if (node_type == 11) { return "BinOp (二元运算)" }
-        if (node_type == 12) { return "Identifier (变量)" }
-        if (node_type == 13) { return "ArrayAccess (数组元素)" }
-        if (node_type == 14) { return "Number (数字)" }
-        return "ErrorNode (错误节点)"
+        if (node_type == 1) { return "Program" }
+        if (node_type == 2) { return "MainDecl" }
+        if (node_type == 3) { return "Block" }
+        if (node_type == 4) { return "VarDecl" }
+        if (node_type == 5) { return "ArrayDecl" }
+        if (node_type == 6) { return "Assign" }
+        if (node_type == 7) { return "ArrayAssign" }
+        if (node_type == 8) { return "IfStat" }
+        if (node_type == 9) { return "ReadStat" }
+        if (node_type == 10) { return "WriteStat" }
+        if (node_type == 11) { return "BinOp" }
+        if (node_type == 12) { return "Identifier" }
+        if (node_type == 13) { return "ArrayAccess" }
+        if (node_type == 14) { return "Number" }
+        if (node_type == 15) { return "WhileStat" }
+        if (node_type == 16) { return "ForStat" }
+        return "ErrorNode"
     }
 }
 
@@ -54,14 +58,12 @@ class ASTNode {
 }
 
 // ==========================================
-// 2. 语法与语义分析器
+// 2. 纯粹的语法分析器引擎
 // ==========================================
 class parser2 {
     private var pointer: Int64
     public var error_cnt: Int64
-    private var symbol_table: Map<String, Int64>  // 🧠 开启符号表：用于查重、查未声明
     private var output_ast: ArrayList<String> 
-    private var next_var_addr: Int64               
     private var token_table: Array<Token>
     private var token_cnt: Int64
     private var out_path: String
@@ -69,8 +71,7 @@ class parser2 {
     private let num2lexeme: Array<String> = ["标识符", "整数", "界符", "操作符", "关键字"]
    
     public parser2(token_table: Array<Token>, token_cnt: Int64, out_path: String){
-        this.pointer = 0; this.error_cnt = 0; this.next_var_addr = 0
-        this.symbol_table = HashMap<String, Int64>()
+        this.pointer = 0; this.error_cnt = 0
         this.output_ast = ArrayList<String>()
         this.token_table = token_table; this.token_cnt = token_cnt; this.out_path = out_path
     }
@@ -80,8 +81,8 @@ class parser2 {
 
     public func run(){
         var root = parse_program()
-        println("  └─ 分析结束！共一次性发现 ${error_cnt} 处错误。")
-        println("  └─ 🚀 正在生成 AST 树 (带伤建树模式)...")
+        println("  └─ 语法分析结束！共发现 ${error_cnt} 处【纯语法结构】错误。")
+        println("  └─ 🚀 正在生成 AST 树...")
         
         output_ast.clear()
         print_ast(root, prefix: "", is_last: true, is_root: true)
@@ -89,7 +90,7 @@ class parser2 {
         let targetPath = Path(out_path)
         if (exists(targetPath)) { remove(targetPath) }
         let file = File.create(out_path)
-        println("\n--- 抽象语法树 (AST) ---")
+        println("\n--- 纯抽象语法树 (AST) ---")
         for(str in output_ast){ println(str); file.write((str+"\n").toArray()) }
         file.close()
     }
@@ -105,7 +106,7 @@ class parser2 {
     }
 
     // ==========================================
-    // 3. 核心：带恐慌模式的代码块解析
+    // 3. 语法结构解析与恐慌模式容错
     // ==========================================
     private func parse_program(assert!: Bool = true): ASTNode {
         var root = ASTNode(NodeType.Program)
@@ -127,25 +128,24 @@ class parser2 {
             if(!is_err(stmt)) { 
                 block.children.add(stmt) 
             } else { 
-                // 🚑 核心修复：语句级恐慌模式！绝不 break！
                 error_cnt++
                 let ln = token_table[pointer].line
-                println("第 ${ln} 行语法错：无法识别的语句结构 (在 '${token_table[pointer].name}' 附近)")
+                println("第 ${ln} 行纯语法错：无法识别的语句结构 (在 '${token_table[pointer].name}' 附近)")
+                pointer++ 
                 
-                pointer++ // 越过当前无法识别的垃圾单词
-                
-                // 一直往前找，直到看见下一个安全标记，再重新开始解析
+                // ✨ 恐慌模式恢复关键字列表中加入了 while 和 for
                 while(pointer < token_cnt &&
                       token_table[pointer].name != "}" &&
                       token_table[pointer].name != ";" &&
                       token_table[pointer].name != "var" &&
                       token_table[pointer].name != "if" &&
                       token_table[pointer].name != "while" &&
+                      token_table[pointer].name != "for" &&
                       token_table[pointer].name != "read" &&
                       token_table[pointer].name != "write") {
                     pointer++
                 }
-                if (pointer < token_cnt && token_table[pointer].name == ";") { pointer++ } // 顺便吃掉分号
+                if (pointer < token_cnt && token_table[pointer].name == ";") { pointer++ } 
             }
         }
         term("}", assert: true); return block
@@ -158,6 +158,14 @@ class parser2 {
         
         pointer = save; node = parse_if_stat(assert: false)
         if(!is_err(node)) { return node }
+
+        // ✨ 路由加入 While 循环探测
+        pointer = save; node = parse_while_stat(assert: false)
+        if(!is_err(node)) { return node }
+
+        // ✨ 路由加入 For 循环探测
+        pointer = save; node = parse_for_stat(assert: false)
+        if(!is_err(node)) { return node }
         
         pointer = save; node = parse_read_stat(assert: false)
         if(!is_err(node)) { return node }
@@ -169,41 +177,27 @@ class parser2 {
     }
 
     // ==========================================
-    // 4. 完美支持类型、数组、赋初值的声明解析
+    // 4. 各类语句的具体解析
     // ==========================================
     private func parse_declaration_stat(assert!: Bool = true): ASTNode {
         var save = pointer
         if(term("var", assert: assert)){
-            if(!cat(0, assert: true, check_id: false)) { pointer = save; return ASTNode(NodeType.ErrorNode) }
+            if(!cat(0, assert: true)) { pointer = save; return ASTNode(NodeType.ErrorNode) }
             var var_name = token_table[pointer-1].name
             
-            // 1. 可选的数组下标 (如 [2])
             var is_array = false
             var arr_size = ASTNode(NodeType.ErrorNode)
+            
             if (term("[", assert: false)) {
-                is_array = true
-                arr_size = parse_expression(assert: true)
-                term("]", assert: true)
+                is_array = true; arr_size = parse_expression(assert: true); term("]", assert: true)
             }
-
-            // 2. 可选的类型注解 (如 : int)
             if (term(":", assert: false)) {
-                if (pointer < token_cnt && (token_table[pointer].name == "int" || token_table[pointer].name == "float")) {
-                    pointer++ // 吃掉类型关键字
-                }
-            }
-
-            // 3. 语义分析：查重
-            if(symbol_table.contains(var_name)){ 
-                error_cnt++; println("第 ${token_table[pointer-1].line} 行错误：变量 '${var_name}' 重复声明！") 
-            } else { 
-                symbol_table[var_name] = next_var_addr; next_var_addr++ 
+                if (pointer < token_cnt && (token_table[pointer].name == "int" || token_table[pointer].name == "float")) { pointer++ }
             }
             
             var var_node = ASTNode(if(is_array){NodeType.ArrayDecl}else{NodeType.VarDecl}, name: var_name)
             if (is_array && !is_err(arr_size)) { var_node.children.add(arr_size) }
 
-            // 4. 可选的赋初值 (如 = 10)
             if(pointer < token_cnt && token_table[pointer].name == "="){
                 pointer++; var expr = parse_expression(assert: true)
                 if(!is_err(expr)) { var_node.children.add(expr) }
@@ -222,13 +216,38 @@ class parser2 {
         return if_node
     }
 
+    // ✨ 加回 While 循环解析
+    private func parse_while_stat(assert!: Bool = true): ASTNode {
+        if(!term("while", assert: assert)) { return ASTNode(NodeType.ErrorNode) }
+        term("(", assert: true); var cond = parse_expression(assert: true); term(")", assert: true)
+        var while_node = ASTNode(NodeType.WhileStat)
+        while_node.children.add(cond)
+        while_node.children.add(parse_function_body(assert: true))
+        return while_node
+    }
+
+    // ✨ 加回 For 循环解析
+    private func parse_for_stat(assert!: Bool = true): ASTNode {
+        if(!term("for", assert: assert)) { return ASTNode(NodeType.ErrorNode) }
+        term("(", assert: true)
+        if(!cat(0, assert: true)) { return ASTNode(NodeType.ErrorNode) } 
+        var loop_var = token_table[pointer-1].name
+        term("in", assert: true)
+        var expr = parse_expression(assert: true)
+        term(")", assert: true)
+        
+        var for_node = ASTNode(NodeType.ForStat)
+        for_node.children.add(ASTNode(NodeType.Identifier, name: loop_var))
+        for_node.children.add(expr)
+        for_node.children.add(parse_function_body(assert: true))
+        return for_node
+    }
+
     private func parse_read_stat(assert!: Bool = true): ASTNode {
         if(!term("read", assert: assert)) { return ASTNode(NodeType.ErrorNode) }
         let has_paren = term("(", assert: false)
-        if(!cat(0, assert: true, check_id: false)){ return ASTNode(NodeType.ErrorNode) }
+        if(!cat(0, assert: true)){ return ASTNode(NodeType.ErrorNode) }
         var var_name = token_table[pointer-1].name
-        
-        if(!symbol_table.contains(var_name)){ error_cnt++; println("第 ${token_table[pointer-1].line} 行错误：变量 '${var_name}' 使用前未声明！") } 
         if(has_paren) { term(")", assert: true) }
         var node = ASTNode(NodeType.ReadStat); node.children.add(ASTNode(NodeType.Identifier, name: var_name))
         eat_semi(); return node 
@@ -242,7 +261,7 @@ class parser2 {
 
     private func parse_expression_stat(assert!: Bool = true): ASTNode {
         var save = pointer
-        if(cat(0, assert: false, check_id: false)){
+        if(cat(0, assert: false)){
             var var_name = token_table[pointer-1].name
             var is_assign = false
             var is_array_assign = false
@@ -257,7 +276,6 @@ class parser2 {
 
             if (is_assign) {
                 var expr = parse_bool_expr(assert: true) 
-                if(!symbol_table.contains(var_name)){ error_cnt++; println("第 ${token_table[pointer-1].line} 行错误：变量 '${var_name}' 赋值前未声明！") }
                 var assign_node = ASTNode(if(is_array_assign){NodeType.ArrayAssign}else{NodeType.Assign}, name: "=")
                 if (is_array_assign) {
                     var arr_acc = ASTNode(NodeType.ArrayAccess, name: var_name); arr_acc.children.add(idx_expr)
@@ -272,7 +290,7 @@ class parser2 {
     }
 
     // ==========================================
-    // 5. 表达式、优先级与符号表查缺
+    // 5. 纯语法表达式解析
     // ==========================================
     private func parse_expression(assert!: Bool = true): ASTNode { return parse_bool_expr(assert: assert) }
 
@@ -313,21 +331,14 @@ class parser2 {
             var expr = parse_additive_expr(assert: true); term(")", assert: true); return expr
         }
         pointer = save
-        if(cat(0, assert: false, check_id: false)){  
+        if(cat(0, assert: false)){  
             var var_name = token_table[pointer-1].name
-            var is_array = false
             if(term("[", assert: false)) {
                 var arr_node = ASTNode(NodeType.ArrayAccess, name: var_name)
                 arr_node.children.add(parse_expression(assert: true)); term("]", assert: true)
-                is_array = true; return arr_node
+                return arr_node
             }
-            if(!is_array) {
-                if(!symbol_table.contains(var_name)){
-                    if(assert) { error_cnt++; println("第 ${token_table[pointer-1].line} 行错误：在表达式中未声明先引用 '${var_name}'！") }
-                    return ASTNode(NodeType.Number, name: "0") // 造假人，保全整个树
-                }
-                return ASTNode(NodeType.Identifier, name: var_name)
-            }
+            return ASTNode(NodeType.Identifier, name: var_name)
         }
         pointer = save
         if(cat(1, assert: assert)){ return ASTNode(NodeType.Number, name: token_table[pointer-1].name) }
@@ -349,7 +360,7 @@ class parser2 {
         }
     }
 
-    private func cat(lexeme: Int64, assert!: Bool = true, check_id!: Bool = true): Bool {
+    private func cat(lexeme: Int64, assert!: Bool = true): Bool {
         if (pointer >= token_cnt || token_table[pointer].lexeme == 5) {
             if (assert) { error_cnt++; let ln = if(pointer > 0) { token_table[pointer-1].line } else { UInt64(1) }; println("第 ${ln} 行类型错：缺少 [${num2lexeme[lexeme]}]") }
             return false
