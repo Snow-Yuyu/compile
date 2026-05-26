@@ -111,7 +111,7 @@ ID		Let_var
 var		var
 ID		error_test
 =		=
-ID		a
+NUM		123
 ;		;
 return		return
 NUM		0

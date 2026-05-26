@@ -108,7 +108,8 @@ class parser2 {
         if(!is_err(root) && error_cnt == 0){
             println("  └─ ✓ 语法与语义分析成功！开始构建抽象语法树(AST)...")
             output_code.clear()
-            print_ast(root, indent: "", is_last: true)
+            // ✨ 核心修正：初始调用加入了 is_root: true 标识
+            print_ast(root, prefix: "", is_last: true, is_root: true)
             write2file()
             println("\n--- 抽象语法树 (Abstract Syntax Tree) ---")
             for(line in output_code){ println(line) }
@@ -118,19 +119,19 @@ class parser2 {
         }
     }
 
-    // ✨ 核心修复：添加了 : Unit 返回值，并将参数标记为命名参数 (!)
-    public func print_ast(node: ASTNode, indent!: String, is_last!: Bool): Unit {
+    // ✨ 核心修正：引入了 is_root 参数，彻底解决了无限空缩进导致的树枝丢失 Bug
+    public func print_ast(node: ASTNode, prefix!: String, is_last!: Bool, is_root!: Bool): Unit {
         if (is_err(node)) { return }
         
-        var marker = if (indent == "") { "" } else if (is_last) { "└── " } else { "├── " }
+        var marker = if (is_root) { "" } else if (is_last) { "└── " } else { "├── " }
         var info = NodeType.toString(node.node_type)
         if (node.name != "") { info += " ['${node.name}']" }
         
-        output_code.add(indent + marker + info)
+        output_code.add(prefix + marker + info)
         
-        var child_indent = indent + if (indent == "") { "" } else if (is_last) { "    " } else { "│   " }
+        var child_prefix = prefix + if (is_root) { "" } else if (is_last) { "    " } else { "│   " }
         for (i in 0..node.children.size) {
-            print_ast(node.children[i], indent: child_indent, is_last: (i == node.children.size - 1))
+            print_ast(node.children[i], prefix: child_prefix, is_last: (i == node.children.size - 1), is_root: false)
         }
     }
 
