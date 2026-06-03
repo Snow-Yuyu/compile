@@ -222,36 +222,68 @@ class Lexer {
 }
 
 main() {
+    // 1. 明确定义三个阶段的文件输出路径
     let src_path = "D:/Astudy/code/compile/input.txt"          
     let lex_out_path = "D:/Astudy/code/compile/token_out.txt"   
-    let parse_out_path = "D:/Astudy/code/compile/pcode_out.txt" 
+    let ast_out_path = "D:/Astudy/code/compile/ast_out.txt"     // ✨ 新增：存放纯语法树
+    let pcode_out_path = "D:/Astudy/code/compile/pcode_out.txt" // 最终目标代码
 
     println("==============================================")
-    println("         编译前端流水线联调启动               ")
+    println("       🚀 仓颉轻量级编译器全链路流水线        ")
     println("==============================================")
 
+    // --------------------------------------------------
+    // 【阶段 1】：词法分析 (Lexer)
+    // --------------------------------------------------
+    println("\n>>> [阶段 1] 正在启动词法分析器 (Lexer)...")
     let reader = FileReader(src_path)
     let src_runes = reader.get_program()
-    if (src_runes.size == 0) { return }
+    if (src_runes.size == 0) { 
+        println("❌ 源文件为空或读取失败，编译终止。")
+        return 
+    }
 
     var myLexer = Lexer(src_runes, lex_out_path)
     let tokens_raw = myLexer.run()
     myLexer.writetofile()
 
-    // 智能清点有效 Token 长度，防止 10000 数组空间的尾部空结构体污染 Parser 计数
+    // 智能清点有效 Token 长度，防止尾部空结构体污染 Parser 计数
     var valid_token_count: Int64 = 0
     for (i in 0..10000) {
-        if (tokens_raw[i].line == 0) {
-            break 
-        }
+        if (tokens_raw[i].line == 0) { break }
         valid_token_count++
     }
 
     var precise_tokens = Array<Token>(valid_token_count, { i => tokens_raw[i] })
-    println("  └─ ✓ 成功在主函数内部清点出有效 Token 数量: ${valid_token_count} 个\n")
+    println("  └─ ✓ 成功清点有效 Token 数量: ${valid_token_count} 个")
 
-    println("[Parser] 正在启动语法与语义分析器...")
-    var myParser = parser2(precise_tokens, valid_token_count, parse_out_path)
-    myParser.run()
+    // --------------------------------------------------
+    // 【阶段 2】：纯语法分析 (Parser / test2)
+    // --------------------------------------------------
+    println("\n>>> [阶段 2] 正在启动纯语法分析器 (Parser)...")
+    
+    // 注意：这里的输出路径改为了 ast_out_path
+    var myParser = parser2(precise_tokens, valid_token_count, ast_out_path)
+    myParser.run() 
+    
+    if (myParser.error_cnt > 0) {
+        println("  └─ ⚠️ 警告：语法阶段发现 ${myParser.error_cnt} 处结构错误，已启动恐慌模式带伤建树。")
+    }
+
+    // --------------------------------------------------
+    // 【阶段 3】：语义分析与中间代码生成 (Semantic / test3)
+    // --------------------------------------------------
+    println("\n>>> [阶段 3] 正在启动语义分析与 P-Code 生成器...")
+    
+    // 1. 读取 test2 刚刚落盘的 AST 文本文件，反序列化在内存中重建语法树
+    let root_node = ASTDeserializer.load_from_file(ast_out_path)
+    
+    // 2. 将重建的树交给语义分析器处理，最终生成 P-Code
+    var analyzer = SemanticAnalyzer()
+    analyzer.run(root_node, pcode_out_path)
+
+    println("\n==============================================")
+    println(" 🎉 编译全流程完美结束！")
+    println(" 目标指令已生成至: ${pcode_out_path}")
     println("==============================================")
 }

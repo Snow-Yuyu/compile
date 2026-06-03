@@ -1,0 +1,30 @@
+Program
+└── MainDecl ['main']
+    └── Block
+        ├── VarDecl ['count']
+        │   └── Number ['0']
+        ├── ArrayDecl ['arr']
+        │   └── Number ['10']
+        ├── WhileStat
+        │   ├── BinOp ['<']
+        │   │   ├── Identifier ['count']
+        │   │   └── Number ['10']
+        │   └── Block
+        │       ├── ArrayAssign ['=']
+        │       │   ├── ArrayAccess ['arr']
+        │       │   │   └── Identifier ['count']
+        │       │   └── BinOp ['*']
+        │       │       ├── Identifier ['count']
+        │       │       └── Number ['2']
+        │       └── Assign ['=']
+        │           ├── Identifier ['count']
+        │           └── BinOp ['+']
+        │               ├── Identifier ['count']
+        │               └── Number ['1']
+        └── ForStat
+            ├── Identifier ['i']
+            ├── Identifier ['arr']
+            └── Block
+                └── WriteStat
+                    └── ArrayAccess ['arr']
+                        └── Identifier ['i']

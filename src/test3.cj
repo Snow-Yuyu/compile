@@ -132,7 +132,6 @@ class SemanticAnalyzer {
 
     // ------------------------------------------
     // [阶段 1]：纯粹的语义一致性检查
-    // ✨ 修复 3：递归函数显式声明 : Unit
     // ------------------------------------------
     private func check_semantics(node: ASTNode): Unit {
         if (node.node_type == NodeType.ErrorNode) { return }
@@ -145,10 +144,17 @@ class SemanticAnalyzer {
                 symbol_table[node.name] = next_addr; next_addr++
             }
         }
-        else if (node.node_type == NodeType.Assign || node.node_type == NodeType.ArrayAssign) {
+        else if (node.node_type == NodeType.Assign) {
             let var_name = node.children[0].name
             if (!symbol_table.contains(var_name)) {
                 println("语义错：变量 '${var_name}' 赋值前未声明！")
+                semantic_error_cnt++
+            }
+        }
+        else if (node.node_type == NodeType.ArrayAssign) {
+            let arr_node = node.children[0]
+            if (!symbol_table.contains(arr_node.name)) {
+                println("语义错：数组 '${arr_node.name}' 赋值前未声明！")
                 semantic_error_cnt++
             }
         }
@@ -159,7 +165,24 @@ class SemanticAnalyzer {
                 semantic_error_cnt++
             }
         }
-        else if (node.node_type == NodeType.Identifier || node.node_type == NodeType.ArrayAccess) {
+        else if (node.node_type == NodeType.ForStat) {
+            let loop_var = node.children[0].name
+            if (!symbol_table.contains(loop_var)) {
+                symbol_table[loop_var] = next_addr; next_addr++
+            }
+            check_semantics(node.children[1]) 
+            check_semantics(node.children[2]) 
+            return 
+        }
+        else if (node.node_type == NodeType.ArrayAccess) {
+            if (!symbol_table.contains(node.name)) {
+                println("语义错：在表达式中未声明先引用了数组 '${node.name}'！")
+                semantic_error_cnt++
+            }
+            check_semantics(node.children[0]) 
+            return 
+        }
+        else if (node.node_type == NodeType.Identifier) {
             if (!symbol_table.contains(node.name)) {
                 println("语义错：在表达式中未声明先引用了变量 '${node.name}'！")
                 semantic_error_cnt++
@@ -171,12 +194,10 @@ class SemanticAnalyzer {
 
     // ------------------------------------------
     // [阶段 2]：中间代码生成 
-    // ✨ 修复 3：递归函数显式声明 : Unit
     // ------------------------------------------
     private func gen_code(node: ASTNode): Unit {
         if (node.node_type == NodeType.Program) {
-            gen_code(node.children[0])
-            pcode.add("STOP") 
+            gen_code(node.children[0]); pcode.add("STOP") 
         }
         else if (node.node_type == NodeType.MainDecl || node.node_type == NodeType.Block) {
             for (child in node.children) { gen_code(child) }
@@ -184,26 +205,25 @@ class SemanticAnalyzer {
         else if (node.node_type == NodeType.VarDecl) {
             symbol_table[node.name] = next_addr; next_addr++
             if (node.children.size > 0) { 
-                gen_code(node.children[0]) 
-                // ✨ 修复 4：移除 ?? 0，直接安全获取 Map 的值
-                pcode.add("STO ${symbol_table[node.name]}") 
+                gen_code(node.children[0]); pcode.add("STO ${symbol_table[node.name]}") 
             }
         }
         else if (node.node_type == NodeType.ArrayDecl) {
-            symbol_table[node.name] = next_addr
-            next_addr += 10 
+            symbol_table[node.name] = next_addr; next_addr += 10 
         }
         else if (node.node_type == NodeType.Assign) {
-            gen_code(node.children[1]) 
-            pcode.add("STO ${symbol_table[node.children[0].name]}")
+            gen_code(node.children[1]); pcode.add("STO ${symbol_table[node.children[0].name]}")
+        }
+        else if (node.node_type == NodeType.ArrayAssign) {
+            gen_code(node.children[1])             
+            gen_code(node.children[0].children[0]) 
+            pcode.add("STO_ARR ${symbol_table[node.children[0].name]}") 
         }
         else if (node.node_type == NodeType.ReadStat) {
-            pcode.add("IN") 
-            pcode.add("STO ${symbol_table[node.children[0].name]}") 
+            pcode.add("IN"); pcode.add("STO ${symbol_table[node.children[0].name]}") 
         }
         else if (node.node_type == NodeType.WriteStat) {
-            gen_code(node.children[0]) 
-            pcode.add("OUT") 
+            gen_code(node.children[0]); pcode.add("OUT") 
         }
         else if (node.node_type == NodeType.Number) {
             pcode.add("LOADI ${node.name}") 
@@ -211,9 +231,12 @@ class SemanticAnalyzer {
         else if (node.node_type == NodeType.Identifier) {
             pcode.add("LOAD ${symbol_table[node.name]}") 
         }
+        else if (node.node_type == NodeType.ArrayAccess) {
+            gen_code(node.children[0])             
+            pcode.add("LOAD_ARR ${symbol_table[node.name]}") 
+        }
         else if (node.node_type == NodeType.BinOp) {
-            gen_code(node.children[0]) 
-            gen_code(node.children[1]) 
+            gen_code(node.children[0]); gen_code(node.children[1]) 
             let op = node.name
             if (op == "+") { pcode.add("ADD") }        
             else if (op == "-") { pcode.add("SUB") }   
@@ -227,31 +250,39 @@ class SemanticAnalyzer {
             else if (op == "!=") { pcode.add("NOTEQ") }
         }
         else if (node.node_type == NodeType.IfStat) {
-            gen_code(node.children[0]) 
-            let cx1 = pcode.size
-            pcode.add("BRF ?") 
-            
+            gen_code(node.children[0]); let cx1 = pcode.size; pcode.add("BRF ?") 
             gen_code(node.children[1]) 
-            
             if (node.children.size > 2) { 
-                let cx2 = pcode.size
-                pcode.add("BR ?") 
-                pcode[cx1] = "BRF ${pcode.size}" 
-                gen_code(node.children[2]) 
-                pcode[cx2] = "BR ${pcode.size}"  
-            } else {
-                pcode[cx1] = "BRF ${pcode.size}" 
-            }
+                let cx2 = pcode.size; pcode.add("BR ?") 
+                pcode[cx1] = "BRF ${pcode.size}"; gen_code(node.children[2]); pcode[cx2] = "BR ${pcode.size}"  
+            } else { pcode[cx1] = "BRF ${pcode.size}" }
         }
         else if (node.node_type == NodeType.WhileStat) {
-            let start = pcode.size 
-            gen_code(node.children[0]) 
+            let start = pcode.size; gen_code(node.children[0]); let cx = pcode.size; pcode.add("BRF ?") 
+            gen_code(node.children[1]); pcode.add("BR ${start}"); pcode[cx] = "BRF ${pcode.size}" 
+        }
+        else if (node.node_type == NodeType.ForStat) {
+            let loop_var = node.children[0].name
+            
+            // ✨ 核心修复：生成代码时，重新为临时循环变量分配内存地址！
+            if (!symbol_table.contains(loop_var)) {
+                symbol_table[loop_var] = next_addr; next_addr++
+            }
+            let var_addr = symbol_table[loop_var]
+            
+            pcode.add("LOADI 0"); pcode.add("STO ${var_addr}")
+            
+            let start = pcode.size
+            pcode.add("LOAD ${var_addr}"); pcode.add("LOADI 10"); pcode.add("LES")
+            
             let cx = pcode.size
             pcode.add("BRF ?") 
             
-            gen_code(node.children[1]) 
-            pcode.add("BR ${start}")
+            gen_code(node.children[2]) 
             
+            pcode.add("LOAD ${var_addr}"); pcode.add("LOADI 1"); pcode.add("ADD"); pcode.add("STO ${var_addr}")
+            
+            pcode.add("BR ${start}") 
             pcode[cx] = "BRF ${pcode.size}" 
         }
     }
