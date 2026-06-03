@@ -1,42 +1,42 @@
-Program
-└── MainDecl ['main']
-    └── Block
-        ├── VarDecl ['x']
-        │   └── Number ['10']
-        ├── ArrayDecl ['arr']
-        │   └── Number ['5']
-        ├── VarDecl ['x']
-        │   └── Number ['20']
-        ├── ArrayDecl ['x']
-        │   └── Number ['10']
-        ├── Assign ['=']
-        │   ├── Identifier ['y']
-        │   └── Number ['100']
-        ├── ArrayAssign ['=']
-        │   ├── ArrayAccess ['ghost_arr']
-        │   │   └── Number ['0']
-        │   └── Number ['50']
-        ├── VarDecl ['z']
-        │   └── BinOp ['+']
-        │       ├── Identifier ['x']
-        │       └── Identifier ['unknown_var']
-        ├── VarDecl ['w']
-        │   └── BinOp ['*']
-        │       ├── ArrayAccess ['ghost_arr2']
-        │       │   └── Number ['1']
-        │       └── Number ['2']
-        ├── ReadStat
-        │   └── Identifier ['input_val']
-        └── ForStat
-            ├── Identifier ['i']
-            ├── Identifier ['arr']
-            └── Block
-                ├── ArrayAssign ['=']
-                │   ├── ArrayAccess ['arr']
-                │   │   └── Identifier ['i']
-                │   └── BinOp ['*']
-                │       ├── Identifier ['i']
-                │       └── Number ['2']
-                └── WriteStat
-                    └── ArrayAccess ['arr']
-                        └── Identifier ['i']
+Program <1>
+└── MainDecl ['main'] <1>
+    └── Block <1>
+        ├── VarDecl ['x'] <5>
+        │   └── Number ['10'] <5>
+        ├── ArrayDecl ['arr'] <6>
+        │   └── Number ['5'] <6>
+        ├── VarDecl ['x'] <13>
+        │   └── Number ['20'] <13>
+        ├── ArrayDecl ['x'] <16>
+        │   └── Number ['10'] <16>
+        ├── Assign ['='] <19>
+        │   ├── Identifier ['y'] <19>
+        │   └── Number ['100'] <19>
+        ├── ArrayAssign ['='] <22>
+        │   ├── ArrayAccess ['ghost_arr'] <22>
+        │   │   └── Number ['0'] <22>
+        │   └── Number ['50'] <22>
+        ├── VarDecl ['z'] <25>
+        │   └── BinOp ['+'] <25>
+        │       ├── Identifier ['x'] <25>
+        │       └── Identifier ['unknown_var'] <25>
+        ├── VarDecl ['w'] <28>
+        │   └── BinOp ['*'] <28>
+        │       ├── ArrayAccess ['ghost_arr2'] <28>
+        │       │   └── Number ['1'] <28>
+        │       └── Number ['2'] <28>
+        ├── ReadStat <31>
+        │   └── Identifier ['input_val'] <31>
+        └── ForStat <37>
+            ├── Identifier ['i'] <37>
+            ├── Identifier ['arr'] <37>
+            └── Block <37>
+                ├── ArrayAssign ['='] <38>
+                │   ├── ArrayAccess ['arr'] <38>
+                │   │   └── Identifier ['i'] <38>
+                │   └── BinOp ['*'] <38>
+                │       ├── Identifier ['i'] <38>
+                │       └── Number ['2'] <38>
+                └── WriteStat <39>
+                    └── ArrayAccess ['arr'] <39>
+                        └── Identifier ['i'] <39>

@@ -1,4 +1,12 @@
 warning[0m: unsecure character:\u{FE0F}
+   ==> D:\Astudy\code\compile\src\test3.cj:198:19:
+    | 
+198 |             // ⚠️ 重点：跳过检查 children[1] (也就是跳过默认把 arr 当成普通表达式去检查)，只去检查循环体
+    |                 ^ unsecure character:\u{FE0F}
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff parser`
+
+warning[0m: unsecure character:\u{FE0F}
    ==> D:\Astudy\code\compile\src\test1.cj:270:30:
     | 
 270 |         println("  └─ ⚠️ 警告：语法阶段发现 ${myParser.error_cnt} 处结构错误，已启动恐慌模式带伤建树。")
@@ -22,18 +30,10 @@ warning[0m: unused import 'std.collection.*'
   | 
   # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-warning[0m: unused import 'std.convert.*'
- ==> D:\Astudy\code\compile\src\test3.cj:5:1:
-  | 
-5 | import std.convert.*
-  | ^^^^^^^^^^^^^^^^^^^^ unused import
-  | 
-  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
 warning[0m: unused variable:'assert'
-   ==> D:\Astudy\code\compile\src\test2.cj:262:40:
+   ==> D:\Astudy\code\compile\src\test2.cj:253:40:
     | 
-262 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
+253 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
     |                                        ^^^^^^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
