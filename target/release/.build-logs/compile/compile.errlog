@@ -14,4 +14,20 @@ warning[0m: unused import 'std.collection.*'
   | 
   # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-2 warnings generated, 2 warnings printed.
+warning[0m: unused import 'std.convert.*'
+ ==> D:\Astudy\code\compile\src\test3.cj:5:1:
+  | 
+5 | import std.convert.*
+  | ^^^^^^^^^^^^^^^^^^^^ unused import
+  | 
+  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:262:40:
+    | 
+262 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
+    |                                        ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.

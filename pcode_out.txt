@@ -1,60 +1,21 @@
-Program (程序入口)
-└── MainDecl (主函数) ['main']
-    └── Block (代码块)
-        ├── VarDecl (变量声明) ['_num_1']
-        │   └── Number (数字) ['100']
-        ├── LetDecl (常量声明) ['MAX_VALUE']
-        │   └── Number (数字) ['999']
-        ├── VarDecl (变量声明) ['IF']
-        │   └── Number (数字) ['1']
-        ├── VarDecl (变量声明) ['Let_var']
-        │   └── Number (数字) ['2']
-        ├── VarDecl (变量声明) ['arr']
-        │   └── Number (数字) ['5']
-        ├── IfStat (条件分支)
-        │   ├── BinOp (二元运算) ['>=']
-        │   │   ├── Identifier (标识符) ['_num_1']
-        │   │   └── Number (数字) ['50']
-        │   ├── Block (代码块)
-        │   │   └── Assign (赋值) ['=']
-        │   │       ├── Identifier (标识符) ['_num_1']
-        │   │       └── BinOp (二元运算) ['-']
-        │   │           ├── BinOp (二元运算) ['+']
-        │   │           │   ├── Identifier (标识符) ['_num_1']
-        │   │           │   └── BinOp (二元运算) ['/']
-        │   │           │       ├── BinOp (二元运算) ['*']
-        │   │           │       │   ├── Number (数字) ['10']
-        │   │           │       │   └── Number (数字) ['2']
-        │   │           │       └── Number (数字) ['4']
-        │   │           └── Number (数字) ['1']
-        │   └── Block (代码块)
-        │       └── WhileStat (While循环)
-        │           ├── BinOp (二元运算) ['!=']
-        │           │   ├── Identifier (标识符) ['MAX_VALUE']
-        │           │   └── Number (数字) ['0']
-        │           └── Block (代码块)
-        │               ├── IfStat (条件分支)
-        │               │   ├── BinOp (二元运算) ['<=']
-        │               │   │   ├── Identifier (标识符) ['MAX_VALUE']
-        │               │   │   └── Number (数字) ['500']
-        │               │   └── Block (代码块)
-        │               │       └── BreakStat (Break跳出)
-        │               └── Assign (赋值) ['=']
-        │                   ├── Identifier (标识符) ['MAX_VALUE']
-        │                   └── BinOp (二元运算) ['-']
-        │                       ├── Identifier (标识符) ['MAX_VALUE']
-        │                       └── Number (数字) ['1']
-        ├── FuncDecl (函数定义) ['test_match']
-        │   └── Block (代码块)
-        │       └── MatchStat (模式匹配)
-        │           ├── Identifier (标识符) ['IF']
-        │           ├── Number (数字) ['1']
-        │           ├── WriteStat (输出)
-        │           │   └── Identifier (标识符) ['IF']
-        │           ├── Number (数字) ['2']
-        │           └── ReadStat (读取)
-        │               └── Identifier (标识符) ['Let_var']
-        ├── VarDecl (变量声明) ['error_test']
-        │   └── Number (数字) ['123']
-        └── ReturnStat (返回)
-            └── Number (数字) ['0']
+Program
+└── MainDecl ['main']
+    └── Block
+        ├── VarDecl ['a']
+        │   └── Number ['10']
+        ├── VarDecl ['a']
+        │   └── Number ['20']
+        ├── VarDecl ['b']
+        │   └── BinOp ['+']
+        │       ├── Identifier ['unknown_var']
+        │       └── Number ['5']
+        ├── Assign ['=']
+        │   ├── Identifier ['bad_var']
+        │   └── Number ['100']
+        └── IfStat
+            ├── BinOp ['>']
+            │   ├── Identifier ['a']
+            │   └── Number ['0']
+            └── Block
+                └── WriteStat
+                    └── Identifier ['b']

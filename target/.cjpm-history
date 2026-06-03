@@ -24,6 +24,7 @@
       "std-requires": [
         "std.collection",
         "std.console",
+        "std.convert",
         "std.fs"
       ],
       "c_libs": {},
