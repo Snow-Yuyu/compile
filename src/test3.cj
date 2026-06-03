@@ -4,9 +4,6 @@ import std.collection.*
 import std.fs.*
 import std.convert.*
 
-// ==========================================
-// 1. AST 反序列化器 
-// ==========================================
 class ASTDeserializer {
     
     public static func fromString(type_str: String): Int64 {
@@ -39,7 +36,6 @@ class ASTDeserializer {
         var root = ASTNode(NodeType.ErrorNode) 
 
         for (line in lines) {
-            // ✨ 修复 1：移除 trim()，直接通过判断跳过无效行
             if (line.size == 0 || line.startsWith("---") || line.startsWith("└─")) { continue }
 
             var first_letter_idx = -1
@@ -49,30 +45,35 @@ class ASTDeserializer {
                     first_letter_idx = i; break
                 }
             }
-            
-            // 如果这一行连字母都没有，说明是空白行，直接跳过
             if (first_letter_idx == -1) { continue }
-
             let depth = first_letter_idx / 4 
 
             var rest = ""
-            for (i in first_letter_idx..runes.size) {
-                rest += runes[i].toString()
+            for (i in first_letter_idx..runes.size) { rest += runes[i].toString() }
+            
+            // ✨ 解析我们在 test2 存进去的 <行号>
+            var node_name = ""
+            var node_line: Int64 = 0
+            
+            let parts = rest.split(" <")
+            if (parts.size > 1) {
+                let line_str = parts[1].replace(">", "")
+                node_line = Int64.parse(line_str)
             }
             
-            let parts = rest.split(" ['")
-            let type_str = parts[0].split(" ")[0] 
-            var node_name = ""
-            if (parts.size > 1) { node_name = parts[1].replace("']", "") }
+            let type_and_name = parts[0]
+            let name_parts = type_and_name.split(" ['")
+            let type_str = name_parts[0].split(" ")[0] 
+            if (name_parts.size > 1) { node_name = name_parts[1].replace("']", "") }
 
-            let node = ASTNode(fromString(type_str), name: node_name)
+            // 完美重建带有行号的节点
+            let node = ASTNode(fromString(type_str), name: node_name, line: node_line)
 
             if (depth == 0) {
                 root = node
                 stack.add(node); depths.add(0)
             } else {
                 while (depths.size > 0 && depths[depths.size - 1] >= depth) {
-                    // ✨ 修复 2：仓颉的 remove 需要传入 Range
                     stack.remove((stack.size - 1)..stack.size)
                     depths.remove((depths.size - 1)..depths.size)
                 }
@@ -87,19 +88,16 @@ class ASTDeserializer {
 // ==========================================
 // 2. 语义分析与中间代码生成器
 // ==========================================
-// ==========================================
-// 2. 语义分析与中间代码生成器 (严格数组类型检查版)
-// ==========================================
 class SemanticAnalyzer {
     private var symbol_table: Map<String, Int64> 
-    private var is_array_map: Map<String, Bool>  // ✨ 新增：类型登记表，记录谁是数组
+    private var is_array_map: Map<String, Bool>  
     private var pcode: ArrayList<String>         
     private var next_addr: Int64
     private var semantic_error_cnt: Int64
 
     public init() {
         this.symbol_table = HashMap<String, Int64>()
-        this.is_array_map = HashMap<String, Bool>() // ✨ 初始化类型表
+        this.is_array_map = HashMap<String, Bool>() 
         this.pcode = ArrayList<String>()
         this.next_addr = 0
         this.semantic_error_cnt = 0
@@ -141,49 +139,43 @@ class SemanticAnalyzer {
 
         if (node.node_type == NodeType.VarDecl || node.node_type == NodeType.ArrayDecl) {
             if (symbol_table.contains(node.name)) {
-                println("语义错：变量 '${node.name}' 重复声明！")
+                println("第 ${node.line} 行语义错：变量 '${node.name}' 重复声明！")
                 semantic_error_cnt++
             } else {
                 symbol_table[node.name] = next_addr; next_addr++
-                // ✨ 核心机制：如果声明的是数组，在这个表里登记为 true
-                if (node.node_type == NodeType.ArrayDecl) {
-                    is_array_map[node.name] = true
-                }
+                if (node.node_type == NodeType.ArrayDecl) { is_array_map[node.name] = true }
             }
         }
         else if (node.node_type == NodeType.Assign) {
             let var_name = node.children[0].name
             if (!symbol_table.contains(var_name)) {
-                println("语义错：变量 '${var_name}' 赋值前未声明！")
+                println("第 ${node.line} 行语义错：变量 '${var_name}' 赋值前未声明！")
                 semantic_error_cnt++
             } 
-            // ✨ 拦截 1：完美解决你的需求！禁止将值直接赋给数组名
             else if (is_array_map.contains(var_name)) {
-                println("语义错：类型不匹配！'${var_name}' 是数组，不能直接赋值，缺少下标！")
+                println("第 ${node.line} 行语义错：类型不匹配！'${var_name}' 是数组，不能直接赋值，缺少下标！")
                 semantic_error_cnt++
             }
         }
         else if (node.node_type == NodeType.ArrayAssign) {
             let arr_node = node.children[0]
             if (!symbol_table.contains(arr_node.name)) {
-                println("语义错：数组 '${arr_node.name}' 赋值前未声明！")
+                println("第 ${node.line} 行语义错：数组 '${arr_node.name}' 赋值前未声明！")
                 semantic_error_cnt++
             }
-            // ✨ 拦截 2：禁止对普通变量使用下标
             else if (!is_array_map.contains(arr_node.name)) {
-                println("语义错：类型不匹配！'${arr_node.name}' 是普通变量，不能使用 [] 访问！")
+                println("第 ${node.line} 行语义错：类型不匹配！'${arr_node.name}' 是普通变量，不能使用 [] 访问！")
                 semantic_error_cnt++
             }
         }
         else if (node.node_type == NodeType.ReadStat) {
             let var_name = node.children[0].name
             if (!symbol_table.contains(var_name)) {
-                println("语义错：在 read 语句中引用了未声明的变量 '${var_name}'！")
+                println("第 ${node.line} 行语义错：在 read 语句中引用了未声明的变量 '${var_name}'！")
                 semantic_error_cnt++
             }
-            // ✨ 拦截 3：禁止 read 整个数组
             else if (is_array_map.contains(var_name)) {
-                println("语义错：类型不匹配！不能直接 read 整个数组 '${var_name}'！")
+                println("第 ${node.line} 行语义错：类型不匹配！不能直接 read 整个数组 '${var_name}'！")
                 semantic_error_cnt++
             }
         }
@@ -192,27 +184,38 @@ class SemanticAnalyzer {
             if (!symbol_table.contains(loop_var)) {
                 symbol_table[loop_var] = next_addr; next_addr++
             }
-            check_semantics(node.children[1]); check_semantics(node.children[2]); return 
+            
+            // ✨ 核心修复：手动检查循环遍历的数组对象，拦截错误用法，但放行合法的数组
+            let arr_node = node.children[1]
+            if (!symbol_table.contains(arr_node.name)) {
+                println("第 ${arr_node.line} 行语义错：for 循环遍历的对象 '${arr_node.name}' 未声明！")
+                semantic_error_cnt++
+            } else if (!is_array_map.contains(arr_node.name)) {
+                println("第 ${arr_node.line} 行语义错：类型不匹配！for 循环只能遍历数组，'${arr_node.name}' 是普通变量！")
+                semantic_error_cnt++
+            }
+            
+            // ⚠️ 重点：跳过检查 children[1] (也就是跳过默认把 arr 当成普通表达式去检查)，只去检查循环体
+            check_semantics(node.children[2]); return 
         }
         else if (node.node_type == NodeType.ArrayAccess) {
             if (!symbol_table.contains(node.name)) {
-                println("语义错：在表达式中未声明先引用了数组 '${node.name}'！")
+                println("第 ${node.line} 行语义错：在表达式中未声明先引用了数组 '${node.name}'！")
                 semantic_error_cnt++
             }
             else if (!is_array_map.contains(node.name)) {
-                println("语义错：类型不匹配！'${node.name}' 是普通变量，不能使用 [] 访问！")
+                println("第 ${node.line} 行语义错：类型不匹配！'${node.name}' 是普通变量，不能使用 [] 访问！")
                 semantic_error_cnt++
             }
             check_semantics(node.children[0]); return 
         }
         else if (node.node_type == NodeType.Identifier) {
             if (!symbol_table.contains(node.name)) {
-                println("语义错：在表达式中未声明先引用了变量 '${node.name}'！")
+                println("第 ${node.line} 行语义错：在表达式中未声明先引用了变量 '${node.name}'！")
                 semantic_error_cnt++
             }
-            // ✨ 拦截 4：禁止将数组名当做普通变量参与数学表达式计算
             else if (is_array_map.contains(node.name)) {
-                println("语义错：类型不匹配！'${node.name}' 是数组名，不能直接参与表达式计算！")
+                println("第 ${node.line} 行语义错：类型不匹配！'${node.name}' 是数组名，不能直接参与表达式计算！")
                 semantic_error_cnt++
             }
         }
@@ -221,7 +224,7 @@ class SemanticAnalyzer {
     }
 
     // ------------------------------------------
-    // [阶段 2]：中间代码生成 (回归纯净版)
+    // [阶段 2]：中间代码生成 
     // ------------------------------------------
     private func gen_code(node: ASTNode): Unit {
         if (node.node_type == NodeType.Program) {
