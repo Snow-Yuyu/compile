@@ -1,42 +1,42 @@
 Program <1>
 └── MainDecl ['main'] <1>
     └── Block <1>
-        ├── VarDecl ['x'] <5>
-        │   └── Number ['10'] <5>
-        ├── ArrayDecl ['arr'] <6>
-        │   └── Number ['5'] <6>
-        ├── VarDecl ['x'] <13>
-        │   └── Number ['20'] <13>
-        ├── ArrayDecl ['x'] <16>
-        │   └── Number ['10'] <16>
-        ├── Assign ['='] <19>
-        │   ├── Identifier ['y'] <19>
-        │   └── Number ['100'] <19>
-        ├── ArrayAssign ['='] <22>
-        │   ├── ArrayAccess ['ghost_arr'] <22>
-        │   │   └── Number ['0'] <22>
-        │   └── Number ['50'] <22>
-        ├── VarDecl ['z'] <25>
-        │   └── BinOp ['+'] <25>
-        │       ├── Identifier ['x'] <25>
-        │       └── Identifier ['unknown_var'] <25>
-        ├── VarDecl ['w'] <28>
-        │   └── BinOp ['*'] <28>
-        │       ├── ArrayAccess ['ghost_arr2'] <28>
-        │       │   └── Number ['1'] <28>
-        │       └── Number ['2'] <28>
-        ├── ReadStat <31>
-        │   └── Identifier ['input_val'] <31>
-        └── ForStat <37>
-            ├── Identifier ['i'] <37>
-            ├── Identifier ['arr'] <37>
-            └── Block <37>
-                ├── ArrayAssign ['='] <38>
-                │   ├── ArrayAccess ['arr'] <38>
-                │   │   └── Identifier ['i'] <38>
-                │   └── BinOp ['*'] <38>
-                │       ├── Identifier ['i'] <38>
-                │       └── Number ['2'] <38>
-                └── WriteStat <39>
-                    └── ArrayAccess ['arr'] <39>
-                        └── Identifier ['i'] <39>
+        ├── VarDecl ['a'] <6>
+        │   └── Number ['10'] <6>
+        ├── IfStat <11>
+        │   ├── BinOp ['>'] <11>
+        │   │   ├── Identifier ['a'] <11>
+        │   │   └── Number ['5'] <11>
+        │   └── Block <11>
+        │       └── Assign ['='] <12>
+        │           ├── Identifier ['a'] <12>
+        │           └── Number ['1'] <12>
+        ├── VarDecl ['b'] <18>
+        ├── VarDecl ['num'] <24>
+        │   └── Number ['10'] <24>
+        ├── ArrayDecl ['myArr'] <25>
+        │   └── Number ['5'] <25>
+        ├── Assign ['='] <29>
+        │   ├── Identifier ['undeclared_var'] <29>
+        │   └── Number ['100'] <29>
+        ├── ArrayAssign ['='] <33>
+        │   ├── ArrayAccess ['num'] <33>
+        │   │   └── Number ['0'] <33>
+        │   └── Number ['99'] <33>
+        ├── Assign ['='] <37>
+        │   ├── Identifier ['myArr'] <37>
+        │   └── Number ['50'] <37>
+        ├── VarDecl ['calc'] <41>
+        │   └── BinOp ['+'] <41>
+        │       ├── BinOp ['*'] <41>
+        │       │   ├── Identifier ['myArr'] <41>
+        │       │   └── Number ['2'] <41>
+        │       └── Number ['1'] <41>
+        ├── ReadStat <45>
+        │   └── Identifier ['myArr'] <45>
+        └── ForStat <49>
+            ├── Identifier ['i'] <49>
+            ├── Identifier ['num'] <49>
+            └── Block <49>
+                └── WriteStat <50>
+                    └── Identifier ['num'] <50>
