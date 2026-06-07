@@ -237,10 +237,27 @@ class SemanticAnalyzer {
             symbol_table[node.name] = next_addr; next_addr++
             if (node.children.size > 0) { 
                 gen_code(node.children[0]); pcode.add("STO ${symbol_table[node.name]}") 
+            } else {
+                // ✨ 普通变量显式内存分配：未赋初值时，显式生成清零指令
+                pcode.add("LOADI 0"); pcode.add("STO ${symbol_table[node.name]}")
             }
         }
         else if (node.node_type == NodeType.ArrayDecl) {
-            symbol_table[node.name] = next_addr; next_addr += 10 
+            // 1. 动态获取语法树中真实声明的数组大小
+            var arr_size: Int64 = 10
+            if (node.children.size > 0 && node.children[0].node_type == NodeType.Number) {
+                arr_size = Int64.parse(node.children[0].name)
+            }
+            
+            symbol_table[node.name] = next_addr
+            
+            // 2. ✨ 数组显式内存分配：在 P-Code 中生成一段连续的初始化指令，真正在内存中占位！
+            for (i in 0..arr_size) {
+                pcode.add("LOADI 0")
+                pcode.add("STO ${next_addr + i}")
+            }
+            
+            next_addr += arr_size 
         }
         else if (node.node_type == NodeType.Assign) {
             gen_code(node.children[1]); pcode.add("STO ${symbol_table[node.children[0].name]}")
