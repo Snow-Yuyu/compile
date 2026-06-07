@@ -232,22 +232,55 @@ class parser2 {
         return for_node
     }
 
-    private func parse_read_stat(assert!: Bool = true): ASTNode {
+   private func parse_read_stat(assert!: Bool = true): ASTNode {
         if(!term("read", assert: assert)) { return ASTNode(NodeType.ErrorNode) }
         let ln = get_ln()
+        
+        // 试探是否有左括号，例如 read(
         let has_paren = term("(", assert: false)
+        
+        // 匹配变量名 (cat(0) 代表 Identifier)
         if(!cat(0, assert: true)){ return ASTNode(NodeType.ErrorNode) }
         var var_name = token_table[pointer-1].name
+        
+        var target_node: ASTNode
+        
+        // ✨ 核心修改：试探是否有中括号，支持数组读取如 read(arr[i])
+        if (term("[", assert: false)) {
+            // 构建 ArrayAccess 节点，并解析中括号内的表达式作为其子节点
+            target_node = ASTNode(NodeType.ArrayAccess, name: var_name, line: get_ln())
+            target_node.children.add(parse_expression(assert: true))
+            term("]", assert: true)
+        } else {
+            // 普通变量读取
+            target_node = ASTNode(NodeType.Identifier, name: var_name, line: get_ln())
+        }
+        
+        // 如果前面有左括号，这里必须匹配右括号
         if(has_paren) { term(")", assert: true) }
-        var node = ASTNode(NodeType.ReadStat, line: ln); node.children.add(ASTNode(NodeType.Identifier, name: var_name, line: get_ln()))
-        eat_semi(); return node 
+        
+        var node = ASTNode(NodeType.ReadStat, line: ln)
+        node.children.add(target_node)
+        eat_semi() 
+        return node 
     }
 
     private func parse_write_stat(assert!: Bool = true): ASTNode {
         if(!term("write", assert: assert)) { return ASTNode(NodeType.ErrorNode) }
         let ln = get_ln()
-        var node = ASTNode(NodeType.WriteStat, line: ln); node.children.add(parse_expression(assert: true))
-        eat_semi(); return node 
+        
+        // ✨ 核心修改：显式处理可选的括号，兼容 write(arr[i]) 和 write arr[i]
+        let has_paren = term("(", assert: false)
+        
+        var node = ASTNode(NodeType.WriteStat, line: ln)
+        
+        // 解析括号内部的表达式 (由于 parse_expression 已经能识别数组访问，这里直接调用即可)
+        node.children.add(parse_expression(assert: true))
+        
+        if(has_paren) { term(")", assert: true) }
+        
+        eat_semi() 
+        return node 
     }
 
     private func parse_expression_stat(assert!: Bool = true): ASTNode {

@@ -169,14 +169,23 @@ class SemanticAnalyzer {
             }
         }
         else if (node.node_type == NodeType.ReadStat) {
-            let var_name = node.children[0].name
-            if (!symbol_table.contains(var_name)) {
-                println("第 ${node.line} 行语义错：在 read 语句中引用了未声明的变量 '${var_name}'！")
-                semantic_error_cnt++
+            let target_node = node.children[0]
+            
+            // 情况 A：如果是普通的变量读取 (Identifier)
+            if (target_node.node_type == NodeType.Identifier) {
+                let var_name = target_node.name
+                if (!symbol_table.contains(var_name)) {
+                    println("第 ${node.line} 行语义错：在 read 语句中引用了未声明的变量 '${var_name}'！")
+                    semantic_error_cnt++
+                }
+                else if (is_array_map.contains(var_name)) {
+                    println("第 ${node.line} 行语义错：类型不匹配！不能直接 read 整个数组 '${var_name}'！")
+                    semantic_error_cnt++
+                }
             }
-            else if (is_array_map.contains(var_name)) {
-                println("第 ${node.line} 行语义错：类型不匹配！不能直接 read 整个数组 '${var_name}'！")
-                semantic_error_cnt++
+            // 情况 B：如果是数组元素读取 (ArrayAccess，比如 arr[i])
+            else if (target_node.node_type == NodeType.ArrayAccess) {
+                // 放行！具体的声明和越界检查，交给最底下自动遍历 children 时的 ArrayAccess 逻辑去处理
             }
         }
         else if (node.node_type == NodeType.ForStat) {
@@ -267,7 +276,17 @@ class SemanticAnalyzer {
             pcode.add("STO_ARR ${symbol_table[node.children[0].name]}") 
         }
         else if (node.node_type == NodeType.ReadStat) {
-            pcode.add("IN"); pcode.add("STO ${symbol_table[node.children[0].name]}") 
+            pcode.add("IN") // 从键盘读入数据，压入栈顶
+            
+            let target_node = node.children[0]
+            if (target_node.node_type == NodeType.ArrayAccess) {
+                // ✨ 如果是向数组读入：先算出中括号里的下标压栈，再调用 STO_ARR
+                gen_code(target_node.children[0]) 
+                pcode.add("STO_ARR ${symbol_table[target_node.name]}") 
+            } else {
+                // 普通标量变量读入
+                pcode.add("STO ${symbol_table[target_node.name]}") 
+            }
         }
         else if (node.node_type == NodeType.WriteStat) {
             gen_code(node.children[0]); pcode.add("OUT") 
