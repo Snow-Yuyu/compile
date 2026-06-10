@@ -1,40 +1,40 @@
-warning[0m: unsecure character:\u{FE0F}
-   ==> D:\Astudy\code\compile\src\test3.cj:207:19:
-    | 
-207 |             // ⚠️ 重点：跳过检查 children[1] (也就是跳过默认把 arr 当成普通表达式去检查)，只去检查循环体
-    |                 ^ unsecure character:\u{FE0F}
-    | 
-    # note: this warning can be suppressed by setting the compiler option `-Woff parser`
+warning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
+  ==> D:\Astudy\code\compile\src\test4.cj:91:37:
+   | 
+91 |                     let input_str = Console.stdIn.readln().getOrThrow()
+   |                                     ^^^^^^^ deprecated
+   | 
+   # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
-warning[0m: unsecure character:\u{FE0F}
-   ==> D:\Astudy\code\compile\src\test1.cj:270:30:
+warning[0m: unused variable:'save'
+   ==> D:\Astudy\code\compile\src\test2.cj:130:13:
     | 
-270 |         println("  └─ ⚠️ 警告：语法阶段发现 ${myParser.error_cnt} 处结构错误，已启动恐慌模式带伤建树。")
-    |                        ^ unsecure character:\u{FE0F}
+130 |         var save = pointer
+    |             ^^^^ unused variable
     | 
-    # note: this warning can be suppressed by setting the compiler option `-Woff parser`
-
-warning[0m: unused import 'std.console.*'
- ==> D:\Astudy\code\compile\src\test1.cj:3:1:
-  | 
-3 | import std.console.*
-  | ^^^^^^^^^^^^^^^^^^^^ unused import
-  | 
-  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-warning[0m: unused import 'std.collection.*'
- ==> D:\Astudy\code\compile\src\test1.cj:4:1:
-  | 
-4 | import std.collection.*
-  | ^^^^^^^^^^^^^^^^^^^^^^^ unused import
-  | 
-  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 warning[0m: unused variable:'assert'
-   ==> D:\Astudy\code\compile\src\test2.cj:286:40:
+   ==> D:\Astudy\code\compile\src\test2.cj:229:40:
     | 
-286 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
+229 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
     |                                        ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:305:36:
+    | 
+305 |     private func term(tok: String, assert!: Bool = true): Bool {
+    |                                    ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:309:37:
+    | 
+309 |     private func cat(lexeme: Int64, assert!: Bool = true): Bool {
+    |                                     ^^^^^^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 

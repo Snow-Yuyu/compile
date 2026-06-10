@@ -5,7 +5,7 @@
       "package": "compile",
       "isMacro": false,
       "accessLevel": "public",
-      "timeStamp": 1781334642,
+      "timeStamp": 1781335737,
       "dependencies": [],
       "std-dependencies": [
         {
@@ -14,13 +14,13 @@
           "isStd": true,
           "imports": [
             {
-              "file": "D:\\Astudy\\code\\compile\\src\\test1.cj"
-            },
-            {
               "file": "D:\\Astudy\\code\\compile\\src\\test2.cj"
             },
             {
               "file": "D:\\Astudy\\code\\compile\\src\\test3.cj"
+            },
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test4.cj"
             }
           ]
         },
@@ -30,7 +30,7 @@
           "isStd": true,
           "imports": [
             {
-              "file": "D:\\Astudy\\code\\compile\\src\\test1.cj"
+              "file": "D:\\Astudy\\code\\compile\\src\\test4.cj"
             }
           ]
         },
@@ -41,6 +41,9 @@
           "imports": [
             {
               "file": "D:\\Astudy\\code\\compile\\src\\test3.cj"
+            },
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test4.cj"
             }
           ]
         },
@@ -57,6 +60,9 @@
             },
             {
               "file": "D:\\Astudy\\code\\compile\\src\\test3.cj"
+            },
+            {
+              "file": "D:\\Astudy\\code\\compile\\src\\test4.cj"
             }
           ]
         }
