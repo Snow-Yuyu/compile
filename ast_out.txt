@@ -1,19 +1,98 @@
 Program <1>
-├── Block ['MultiDecl'] <2>
-│   ├── VarDecl ['global_val'] <2>
-│   │   └── Number ['100'] <2>
-│   └── VarDecl ['flag'] <2>
-│       └── Number ['1'] <2>
-└── FuncDecl ['add_and_print'] <5>
-    ├── Identifier ['x'] <5>
-    ├── Identifier ['y'] <5>
-    └── Block <5>
-        ├── Block ['MultiDecl'] <6>
-        │   └── VarDecl ['result'] <6>
-        │       └── BinOp ['+'] <6>
-        │           ├── Identifier ['x'] <6>
-        │           └── Identifier ['y'] <6>
-        ├── WriteStat <7>
-        │   └── Identifier ['result'] <7>
-        └── ReturnStat <9>
-            └── Identifier ['result'] <9>
+├── Block ['MultiDecl'] <6>
+│   ├── VarDecl ['global_flag'] <6>
+│   │   └── Number ['1'] <6>
+│   └── VarDecl ['global_count'] <6>
+│       └── Number ['0'] <6>
+├── Block ['MultiDecl'] <7>
+│   └── ArrayDecl ['arr'] <7>
+│       └── Number ['5'] <7>
+├── FuncDecl ['calc_sum'] <11>
+│   ├── Identifier ['x'] <11>
+│   ├── Identifier ['y'] <11>
+│   └── Block <11>
+│       ├── Block ['MultiDecl'] <12>
+│       │   └── VarDecl ['temp'] <12>
+│       │       └── BinOp ['+'] <12>
+│       │           ├── Identifier ['x'] <12>
+│       │           └── Identifier ['y'] <12>
+│       └── ReturnStat <13>
+│           └── Identifier ['temp'] <13>
+├── FuncDecl ['test_switch'] <17>
+│   ├── Identifier ['val'] <17>
+│   └── Block <17>
+│       ├── SwitchStat <19>
+│       │   ├── Identifier ['val'] <19>
+│       │   ├── CaseStat <20>
+│       │   │   ├── Number ['1'] <20>
+│       │   │   └── Block <20>
+│       │   │       └── WriteStat <21>
+│       │   │           └── Number ['111'] <21>
+│       │   ├── CaseStat <22>
+│       │   │   ├── Number ['2'] <22>
+│       │   │   └── Block <22>
+│       │   │       └── WriteStat <23>
+│       │   │           └── Number ['222'] <23>
+│       │   └── Block ['default'] <24>
+│       │       └── WriteStat <25>
+│       │           └── Number ['999'] <25>
+│       └── ReturnStat <27>
+│           └── Number ['0'] <27>
+└── FuncDecl ['main'] <31>
+    └── Block <31>
+        ├── Block ['MultiDecl'] <33>
+        │   ├── VarDecl ['a'] <33>
+        │   │   └── Number ['10'] <33>
+        │   ├── VarDecl ['b'] <33>
+        │   │   └── Number ['20'] <33>
+        │   └── VarDecl ['temp'] <33>
+        │       └── Number ['99'] <33>
+        ├── WriteStat <36>
+        │   └── Number ['888888'] <36>
+        ├── Block ['MultiDecl'] <37>
+        │   └── VarDecl ['sum'] <37>
+        │       └── FuncCall ['calc_sum'] <37>
+        │           ├── Identifier ['a'] <37>
+        │           └── Identifier ['b'] <37>
+        ├── WriteStat <38>
+        │   └── Identifier ['sum'] <38>
+        ├── WriteStat <41>
+        │   └── Number ['888888'] <41>
+        ├── Block ['MultiDecl'] <42>
+        │   └── VarDecl ['i'] <42>
+        │       └── Number ['0'] <42>
+        ├── DoWhileStat <44>
+        │   ├── Block <44>
+        │   │   ├── ArrayAssign ['='] <45>
+        │   │   │   ├── ArrayAccess ['arr'] <45>
+        │   │   │   │   └── Identifier ['i'] <45>
+        │   │   │   └── BinOp ['*'] <45>
+        │   │   │       ├── Identifier ['i'] <45>
+        │   │   │       └── Number ['10'] <45>
+        │   │   └── Assign ['='] <46>
+        │   │       ├── Identifier ['i'] <46>
+        │   │       └── BinOp ['+'] <46>
+        │   │           ├── Identifier ['i'] <46>
+        │   │           └── Number ['1'] <46>
+        │   └── BinOp ['<'] <47>
+        │       ├── Identifier ['i'] <47>
+        │       └── Number ['3'] <47>
+        ├── WriteStat <49>
+        │   └── ArrayAccess ['arr'] <49>
+        │       └── Number ['0'] <49>
+        ├── WriteStat <50>
+        │   └── ArrayAccess ['arr'] <50>
+        │       └── Number ['1'] <50>
+        ├── WriteStat <51>
+        │   └── ArrayAccess ['arr'] <51>
+        │       └── Number ['2'] <51>
+        ├── WriteStat <54>
+        │   └── Number ['888888'] <54>
+        ├── FuncCall ['test_switch'] <55>
+        │   └── Number ['2'] <55>
+        ├── FuncCall ['test_switch'] <56>
+        │   └── Number ['5'] <56>
+        ├── WriteStat <59>
+        │   └── Number ['888888'] <59>
+        └── WriteStat <60>
+            └── Identifier ['temp'] <60>

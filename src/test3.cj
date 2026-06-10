@@ -20,7 +20,9 @@ public class ASTDeserializer {
         var root = ASTNode(NodeType.ErrorNode) 
 
         for (line in lines) {
-            if (line.size == 0 || line.startsWith("---") || line.startsWith("└─")) { continue }
+            // ✨ 修复核心 Bug：删除了对 └─ 的误杀，只跳过空行和纯分隔符
+            if (line.size == 0 || line.startsWith("---")) { continue }
+            
             var first_letter_idx = -1
             let runes = line.toRuneArray()
             for (i in 0..runes.size) { if ((runes[i] >= r'A' && runes[i] <= r'Z') || (runes[i] >= r'a' && runes[i] <= r'z')) { first_letter_idx = i; break } }
@@ -45,17 +47,15 @@ public class ASTDeserializer {
     }
 }
 
-// ✨ 重构：带有作用域信息的符号表
 struct SymbolInfo {
     public var name: String
-    public var kind: Int64  // 0: 全局, 1: 局部, 2: 函数, 3: 数组(全局), 4: 数组(局部)
-    public var addr: Int64  // 绝对地址，或基于 base 的相对偏移量
-    public var args_count: Int64 // 用于函数
+    public var kind: Int64  
+    public var addr: Int64  
+    public var args_count: Int64 
     public init(n: String, k: Int64, a: Int64, ac: Int64) { name = n; kind = k; addr = a; args_count = ac }
 }
 
 public class SemanticAnalyzer {
-    // 符号表栈：index 0 是全局，index 1 往后是局部作用域
     private var sym_stack: ArrayList<HashMap<String, SymbolInfo>> 
     private var pcode: ArrayList<String>         
     private var global_addr: Int64
@@ -64,32 +64,23 @@ public class SemanticAnalyzer {
 
     public init() {
         this.sym_stack = ArrayList<HashMap<String, SymbolInfo>>()
-        this.sym_stack.add(HashMap<String, SymbolInfo>()) // 推入全局作用域
+        this.sym_stack.add(HashMap<String, SymbolInfo>()) 
         this.pcode = ArrayList<String>()
         this.global_addr = 0
-        this.local_offset = 2 // 局部变量从 base+2 开始 (0是DL, 1是RA)
+        this.local_offset = 2 
         this.current_func_args = 0
     }
 
     private func push_scope() { sym_stack.add(HashMap<String, SymbolInfo>()); local_offset = 2 }
     private func pop_scope() { sym_stack.remove((sym_stack.size - 1)..sym_stack.size) }
-    
-    private func add_symbol(name: String, kind: Int64, addr: Int64, args: Int64) {
-        sym_stack[sym_stack.size - 1][name] = SymbolInfo(name, kind, addr, args)
-    }
-
+    private func add_symbol(name: String, kind: Int64, addr: Int64, args: Int64) { sym_stack[sym_stack.size - 1][name] = SymbolInfo(name, kind, addr, args) }
     private func find_symbol(name: String): Option<SymbolInfo> {
         var i = sym_stack.size - 1
-        while (i >= 0) {
-            if (sym_stack[i].contains(name)) { return Some(sym_stack[i][name]) }
-            i--
-        }
+        while (i >= 0) { if (sym_stack[i].contains(name)) { return Some(sym_stack[i][name]) }; i-- }
         return None
     }
 
     public func run(root: ASTNode, out_path: String) {
-        // ✨ 程序顶层编译逻辑
-        // 1. 先扫一遍全局变量，并生成初始分配指令
         for (child in root.children) {
             if (child.node_type == NodeType.VarDecl) {
                 add_symbol(child.name, 0, global_addr, 0)
@@ -102,25 +93,27 @@ public class SemanticAnalyzer {
                 global_addr += size
             } else if (child.node_type == NodeType.Block && child.name == "MultiDecl") {
                 for (v in child.children) {
-                    add_symbol(v.name, 0, global_addr, 0); pcode.add("LOADI 0"); pcode.add("STOG ${global_addr}"); global_addr++
+                    // ✨ 修复：正确处理逗号声明里的全局数组容量分配
+                    if (v.node_type == NodeType.ArrayDecl) {
+                        var size = if (v.children.size>0){Int64.parse(v.children[0].name)}else{10}
+                        add_symbol(v.name, 3, global_addr, 0)
+                        for (i in 0..size) { pcode.add("LOADI 0"); pcode.add("STOG ${global_addr+i}") }
+                        global_addr += size
+                    } else {
+                        add_symbol(v.name, 0, global_addr, 0); pcode.add("LOADI 0"); pcode.add("STOG ${global_addr}"); global_addr++
+                    }
                 }
             }
         }
         
-        // 2. 全局预先登记函数，允许互相调用
         for (child in root.children) {
-            if (child.node_type == NodeType.FuncDecl) {
-                // addr 先用 -1 占位，等真正生成指令时再填
-                add_symbol(child.name, 2, -1, child.children.size - 1)
-            }
+            if (child.node_type == NodeType.FuncDecl) { add_symbol(child.name, 2, -1, child.children.size - 1) }
         }
 
-        // 3. 注入启动 main() 的指令
         let start_main_idx = pcode.size
-        pcode.add("CAL ?") // 待回填的 main 入口
+        pcode.add("CAL ?") 
         pcode.add("STOP")
 
-        // 4. 深度编译所有函数
         var main_addr = 0
         for (child in root.children) {
             if (child.node_type == NodeType.FuncDecl) {
@@ -128,14 +121,12 @@ public class SemanticAnalyzer {
                 let f_addr = pcode.size
                 if (func_name == "main") { main_addr = f_addr }
                 
-                // 更新全局符号表中的真实入口地址
                 var top_scope = sym_stack[0]
                 var old_info = top_scope[func_name]
                 top_scope[func_name] = SymbolInfo(old_info.name, 2, f_addr, old_info.args_count)
 
                 push_scope()
                 current_func_args = child.children.size - 1
-                // 绑定参数到当前作用域：参数地址位于 base - args_count 到 base - 1
                 for (i in 0..current_func_args) {
                     let p_name = child.children[i].name
                     let p_offset = -current_func_args + i
@@ -143,21 +134,23 @@ public class SemanticAnalyzer {
                 }
 
                 let enter_idx = pcode.size
-                pcode.add("ENTER ?") // 等待分配了多少局部变量后再回填
-                
-                gen_code(child.children[current_func_args]) // 生成函数体(Block)
-                
-                pcode[enter_idx] = "ENTER ${local_offset - 2}" // 减去默认的 2
-                pcode.add("LOADI 0") // 默认返回值 0
-                pcode.add("RETURN ${current_func_args}") // 强行加兜底返回
+                pcode.add("ENTER ?") 
+                gen_code(child.children[current_func_args]) 
+                pcode[enter_idx] = "ENTER ${local_offset - 2}" 
+                pcode.add("LOADI 0") 
+                pcode.add("RETURN ${current_func_args}") 
                 pop_scope()
             }
         }
 
-        // 回填 main
-        pcode[start_main_idx] = "CAL ${main_addr}"
+        // ✨ 新增防爆机制：如果没找到 main 函数，主动终止而不是死循环
+        if (main_addr == 0) {
+            println("[警告] 未找到 main() 函数！虚拟机指令无法生成合法入口点，强制停机。")
+            pcode[start_main_idx] = "STOP"
+        } else {
+            pcode[start_main_idx] = "CAL ${main_addr}"
+        }
 
-        // 写入文件
         let targetPath = Path(out_path); if (exists(targetPath)) { remove(targetPath) }
         let file = File.create(out_path)
         for (i in 0..pcode.size) { file.write(("${i}:\t${pcode[i]}\n").toArray()) }
@@ -170,7 +163,7 @@ public class SemanticAnalyzer {
             else { for (child in node.children) { gen_code(child) } }
         }
         else if (node.node_type == NodeType.VarDecl) {
-            if (sym_stack.size > 1) { // 局部变量
+            if (sym_stack.size > 1) { 
                 add_symbol(node.name, 1, local_offset, 0)
                 if (node.children.size > 0) { gen_code(node.children[0]) } else { pcode.add("LOADI 0") }
                 pcode.add("STO ${local_offset}"); local_offset++
@@ -210,7 +203,7 @@ public class SemanticAnalyzer {
             }
         }
         else if (node.node_type == NodeType.FuncCall) {
-            for (arg in node.children) { gen_code(arg) } // 压入实参
+            for (arg in node.children) { gen_code(arg) } 
             if (let Some(sym) <- find_symbol(node.name)) { pcode.add("CAL ${sym.addr}") }
         }
         else if (node.node_type == NodeType.ReturnStat) {
@@ -223,22 +216,22 @@ public class SemanticAnalyzer {
             pcode.add("BRT ${start}") 
         }
         else if (node.node_type == NodeType.SwitchStat) {
-            gen_code(node.children[0]) // switch 表达式压栈
+            gen_code(node.children[0]) 
             let end_jumps = ArrayList<Int64>()
             for (c in node.children) {
                 if (c.node_type == NodeType.CaseStat) {
-                    pcode.add("COPY") // 复制栈顶以供后续比对
+                    pcode.add("COPY") 
                     gen_code(c.children[0])
                     pcode.add("EQ")
                     let fail_jump = pcode.size; pcode.add("BRF ?")
-                    gen_code(c.children[1]) // 执行 case 块
-                    end_jumps.add(pcode.size); pcode.add("BR ?") // 执行完跳出
+                    gen_code(c.children[1]) 
+                    end_jumps.add(pcode.size); pcode.add("BR ?") 
                     pcode[fail_jump] = "BRF ${pcode.size}"
                 } else if (c.node_type == NodeType.Block && c.name == "default") {
                     gen_code(c)
                 }
             }
-            pcode.add("POP") // 丢弃最初的 switch 表达式结果
+            pcode.add("POP") 
             for (idx in end_jumps) { pcode[idx] = "BR ${pcode.size}" }
         }
         else if (node.node_type == NodeType.IfStat) {

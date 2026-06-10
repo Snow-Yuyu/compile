@@ -36,7 +36,7 @@ class Lexer {
     // ✨ 补充了所有新语法所需的关键字
     private let keywords: Array<String> = [
         "break", "case", "const", "continue", "default", "do", "else", "for", 
-        "func", "if", "in", "int", "let", "main", "read", "return", 
+        "func", "if", "in", "int", "let", "read", "return", 
         "switch", "var", "void", "while", "write"
     ]
 

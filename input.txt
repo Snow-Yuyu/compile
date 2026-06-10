@@ -1,35 +1,61 @@
-// 1. 全局变量 与 多变量逗号声明
-var global_val = 100, flag = 1;
+// ==========================================
+// 仓颉轻量级编译器 - 终极特性验收测试
+// ==========================================
 
-// 2. 带参函数 与 局部作用域隔离 (参数 x, y)
-func add_and_print(x, y) {
-    var result = x + y;  // 这里的 result 是局部变量，绝对不会冲突
-    write(result);
-    // 3. 返回值功能
-    return result;
+// 【特性 5、6、7】全局变量、多变量逗号声明、一维数组
+var global_flag = 1, global_count = 0;
+var arr[5];
+
+// 【特性 3、4】带参函数、带返回值函数
+// 【特性 2】局部作用域隔离：这里的 temp 与其他函数的 temp 互不干扰
+func calc_sum(x, y) {
+    var temp = x + y;
+    return temp;
 }
 
-func main() {
-    var a = 10, b = 20;
-    
-    // 4. 函数调用栈机制验证
-    var sum = add_and_print(a, b); 
-    write(sum); // 验证返回值能否被正确接住
-    
-    // 5. do-while 循环扩展
-    var count = 0;
-    do {
-        count = count + 1;
-    } while (count < 3);
-    write(count);
-    
-    // 6. switch 分支扩展
-    switch (flag) {
-        case 1:
+// 辅助函数：测试 switch 分支
+func test_switch(val) {
+    // 【特性 1】switch 语句
+    switch(val) {
+        case 1: 
+            write(111);
+        case 2: 
+            write(222);
+        default: 
             write(999);
-        case 2:
-            write(888);
-        default:
-            write(0);
     }
+    return 0;
+}
+
+// 主程序入口
+func main() {
+    // 【特性 6】局部多变量声明
+    var a = 10, b = 20, temp = 99; 
+    
+    // 1. 测试函数调用栈与返回值
+    write(888888); // 打印分割线
+    var sum = calc_sum(a, b);
+    write(sum); // 预期输出: 30 (10 + 20)
+    
+    // 2. 测试全局数组与 do-while 循环
+    write(888888); // 打印分割线
+    var i = 0;
+    // 【特性 1】do-while 语句
+    do {
+        arr[i] = i * 10;
+        i = i + 1;
+    } while (i < 3);
+    
+    write(arr[0]); // 预期输出: 0
+    write(arr[1]); // 预期输出: 10
+    write(arr[2]); // 预期输出: 20
+    
+    // 3. 测试 Switch-Case 控制流
+    write(888888); // 打印分割线
+    test_switch(2); // 预期匹配 case 2，输出: 222
+    test_switch(5); // 预期匹配 default，输出: 999
+    
+    // 4. 验证局部变量隔离
+    write(888888); // 打印分割线
+    write(temp); // 预期输出: 99 (证明未被 calc_sum 里的 temp 污染)
 }
