@@ -6,6 +6,14 @@ warning[0m: class 'Console' is deprecated. Use related global functions in the 
    | 
    # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
 
+warning[0m: unused variable:'i'
+   ==> D:\Astudy\code\compile\src\test3.cj:107:14:
+    | 
+107 |         for (i in 0..global_addr) {
+    |              ^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
 warning[0m: unused variable:'save'
    ==> D:\Astudy\code\compile\src\test2.cj:130:13:
     | 
@@ -38,4 +46,4 @@ warning[0m: unused variable:'assert'
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-5 warnings generated, 5 warnings printed.
+6 warnings generated, 6 warnings printed.

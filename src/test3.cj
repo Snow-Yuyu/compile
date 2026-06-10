@@ -20,9 +20,7 @@ public class ASTDeserializer {
         var root = ASTNode(NodeType.ErrorNode) 
 
         for (line in lines) {
-            // ✨ 修复核心 Bug：删除了对 └─ 的误杀，只跳过空行和纯分隔符
             if (line.size == 0 || line.startsWith("---")) { continue }
-            
             var first_letter_idx = -1
             let runes = line.toRuneArray()
             for (i in 0..runes.size) { if ((runes[i] >= r'A' && runes[i] <= r'Z') || (runes[i] >= r'a' && runes[i] <= r'z')) { first_letter_idx = i; break } }
@@ -48,27 +46,20 @@ public class ASTDeserializer {
 }
 
 struct SymbolInfo {
-    public var name: String
-    public var kind: Int64  
-    public var addr: Int64  
-    public var args_count: Int64 
+    public var name: String; public var kind: Int64; public var addr: Int64; public var args_count: Int64 
     public init(n: String, k: Int64, a: Int64, ac: Int64) { name = n; kind = k; addr = a; args_count = ac }
 }
 
 public class SemanticAnalyzer {
     private var sym_stack: ArrayList<HashMap<String, SymbolInfo>> 
     private var pcode: ArrayList<String>         
-    private var global_addr: Int64
-    private var local_offset: Int64
-    private var current_func_args: Int64
+    private var global_addr: Int64; private var local_offset: Int64; private var current_func_args: Int64
 
     public init() {
         this.sym_stack = ArrayList<HashMap<String, SymbolInfo>>()
         this.sym_stack.add(HashMap<String, SymbolInfo>()) 
         this.pcode = ArrayList<String>()
-        this.global_addr = 0
-        this.local_offset = 2 
-        this.current_func_args = 0
+        this.global_addr = 0; this.local_offset = 2; this.current_func_args = 0
     }
 
     private func push_scope() { sym_stack.add(HashMap<String, SymbolInfo>()); local_offset = 2 }
@@ -81,10 +72,11 @@ public class SemanticAnalyzer {
     }
 
     public func run(root: ASTNode, out_path: String) {
+        // 全局变量分配
         for (child in root.children) {
             if (child.node_type == NodeType.VarDecl) {
                 add_symbol(child.name, 0, global_addr, 0)
-                pcode.add("LOADI " + (if(child.children.size>0){child.children[0].name}else{"0"}))
+                if (child.children.size > 0) { gen_code(child.children[0]) } else { pcode.add("LOADI 0") }
                 pcode.add("STOG ${global_addr}"); global_addr++
             } else if (child.node_type == NodeType.ArrayDecl) {
                 var size = if (child.children.size>0){Int64.parse(child.children[0].name)}else{10}
@@ -93,14 +85,15 @@ public class SemanticAnalyzer {
                 global_addr += size
             } else if (child.node_type == NodeType.Block && child.name == "MultiDecl") {
                 for (v in child.children) {
-                    // ✨ 修复：正确处理逗号声明里的全局数组容量分配
                     if (v.node_type == NodeType.ArrayDecl) {
                         var size = if (v.children.size>0){Int64.parse(v.children[0].name)}else{10}
                         add_symbol(v.name, 3, global_addr, 0)
                         for (i in 0..size) { pcode.add("LOADI 0"); pcode.add("STOG ${global_addr+i}") }
                         global_addr += size
                     } else {
-                        add_symbol(v.name, 0, global_addr, 0); pcode.add("LOADI 0"); pcode.add("STOG ${global_addr}"); global_addr++
+                        add_symbol(v.name, 0, global_addr, 0)
+                        if (v.children.size > 0) { gen_code(v.children[0]) } else { pcode.add("LOADI 0") }
+                        pcode.add("STOG ${global_addr}"); global_addr++
                     }
                 }
             }
@@ -110,6 +103,11 @@ public class SemanticAnalyzer {
             if (child.node_type == NodeType.FuncDecl) { add_symbol(child.name, 2, -1, child.children.size - 1) }
         }
 
+        // 🚨 修复Bug 1：彻底隔离全局变量与 main() 的栈帧，强行垫高栈底！
+        for (i in 0..global_addr) {
+            pcode.add("LOADI 0")
+        }
+
         let start_main_idx = pcode.size
         pcode.add("CAL ?") 
         pcode.add("STOP")
@@ -117,44 +115,27 @@ public class SemanticAnalyzer {
         var main_addr = 0
         for (child in root.children) {
             if (child.node_type == NodeType.FuncDecl) {
-                let func_name = child.name
-                let f_addr = pcode.size
+                let func_name = child.name; let f_addr = pcode.size
                 if (func_name == "main") { main_addr = f_addr }
-                
-                var top_scope = sym_stack[0]
-                var old_info = top_scope[func_name]
+                var top_scope = sym_stack[0]; var old_info = top_scope[func_name]
                 top_scope[func_name] = SymbolInfo(old_info.name, 2, f_addr, old_info.args_count)
-
-                push_scope()
-                current_func_args = child.children.size - 1
+                push_scope(); current_func_args = child.children.size - 1
                 for (i in 0..current_func_args) {
-                    let p_name = child.children[i].name
-                    let p_offset = -current_func_args + i
-                    add_symbol(p_name, 1, p_offset, 0)
+                    add_symbol(child.children[i].name, 1, -current_func_args + i, 0)
                 }
-
                 let enter_idx = pcode.size
                 pcode.add("ENTER ?") 
                 gen_code(child.children[current_func_args]) 
                 pcode[enter_idx] = "ENTER ${local_offset - 2}" 
-                pcode.add("LOADI 0") 
-                pcode.add("RETURN ${current_func_args}") 
+                pcode.add("LOADI 0"); pcode.add("RETURN ${current_func_args}") 
                 pop_scope()
             }
         }
 
-        // ✨ 新增防爆机制：如果没找到 main 函数，主动终止而不是死循环
-        if (main_addr == 0) {
-            println("[警告] 未找到 main() 函数！虚拟机指令无法生成合法入口点，强制停机。")
-            pcode[start_main_idx] = "STOP"
-        } else {
-            pcode[start_main_idx] = "CAL ${main_addr}"
-        }
+        if (main_addr == 0) { pcode[start_main_idx] = "STOP" } else { pcode[start_main_idx] = "CAL ${main_addr}" }
 
         let targetPath = Path(out_path); if (exists(targetPath)) { remove(targetPath) }
-        let file = File.create(out_path)
-        for (i in 0..pcode.size) { file.write(("${i}:\t${pcode[i]}\n").toArray()) }
-        file.close()
+        let file = File.create(out_path); for (i in 0..pcode.size) { file.write(("${i}:\t${pcode[i]}\n").toArray()) }; file.close()
     }
 
     private func gen_code(node: ASTNode): Unit {
@@ -173,21 +154,20 @@ public class SemanticAnalyzer {
             if (sym_stack.size > 1) { 
                 var size = if (node.children.size>0){Int64.parse(node.children[0].name)}else{10}
                 add_symbol(node.name, 4, local_offset, 0)
-                for (i in 0..size) { pcode.add("LOADI 0"); pcode.add("STO ${local_offset+i}") }
-                local_offset += size 
+                for (i in 0..size) { pcode.add("LOADI 0"); pcode.add("STO ${local_offset+i}") }; local_offset += size 
             }
         }
         else if (node.node_type == NodeType.Assign) {
-            let var_name = node.children[0].name
             gen_code(node.children[1])
-            if (let Some(sym) <- find_symbol(var_name)) {
+            if (let Some(sym) <- find_symbol(node.children[0].name)) {
                 if (sym.kind == 0) { pcode.add("STOG ${sym.addr}") } else { pcode.add("STO ${sym.addr}") }
             }
         }
         else if (node.node_type == NodeType.ArrayAssign) {
-            let arr_name = node.children[0].name
-            gen_code(node.children[1]); gen_code(node.children[0].children[0]) 
-            if (let Some(sym) <- find_symbol(arr_name)) {
+            // 🚨 修复Bug 2：先算下标(Offset)，再算值(Value)，完美契合 VM 出栈顺序
+            gen_code(node.children[0].children[0]) 
+            gen_code(node.children[1]) 
+            if (let Some(sym) <- find_symbol(node.children[0].name)) {
                 if (sym.kind == 3) { pcode.add("STOG_ARR ${sym.addr}") } else { pcode.add("STO_ARR ${sym.addr}") }
             }
         }
@@ -211,25 +191,18 @@ public class SemanticAnalyzer {
             pcode.add("RETURN ${current_func_args}")
         }
         else if (node.node_type == NodeType.DoWhileStat) {
-            let start = pcode.size
-            gen_code(node.children[0]); gen_code(node.children[1])
-            pcode.add("BRT ${start}") 
+            let start = pcode.size; gen_code(node.children[0]); gen_code(node.children[1]); pcode.add("BRT ${start}") 
         }
         else if (node.node_type == NodeType.SwitchStat) {
             gen_code(node.children[0]) 
             let end_jumps = ArrayList<Int64>()
             for (c in node.children) {
                 if (c.node_type == NodeType.CaseStat) {
-                    pcode.add("COPY") 
-                    gen_code(c.children[0])
-                    pcode.add("EQ")
+                    pcode.add("COPY"); gen_code(c.children[0]); pcode.add("EQ")
                     let fail_jump = pcode.size; pcode.add("BRF ?")
                     gen_code(c.children[1]) 
-                    end_jumps.add(pcode.size); pcode.add("BR ?") 
-                    pcode[fail_jump] = "BRF ${pcode.size}"
-                } else if (c.node_type == NodeType.Block && c.name == "default") {
-                    gen_code(c)
-                }
+                    end_jumps.add(pcode.size); pcode.add("BR ?"); pcode[fail_jump] = "BRF ${pcode.size}"
+                } else if (c.node_type == NodeType.Block && c.name == "default") { gen_code(c) }
             }
             pcode.add("POP") 
             for (idx in end_jumps) { pcode[idx] = "BR ${pcode.size}" }
@@ -255,12 +228,13 @@ public class SemanticAnalyzer {
             pcode.add("BR ${start}"); pcode[cx] = "BRF ${pcode.size}" 
         }
         else if (node.node_type == NodeType.ReadStat) {
-            pcode.add("IN") 
             let target = node.children[0]
             if (target.node_type == NodeType.ArrayAccess) {
-                gen_code(target.children[0]) 
+                gen_code(target.children[0]) // 🚨 修复Bug 2.1：向数组读入时，同样要先压入 Offset
+                pcode.add("IN")              // 然后才压入键盘读取的 Value
                 if (let Some(sym) <- find_symbol(target.name)) { if (sym.kind == 3) { pcode.add("STOG_ARR ${sym.addr}") } else { pcode.add("STO_ARR ${sym.addr}") } }
             } else {
+                pcode.add("IN") 
                 if (let Some(sym) <- find_symbol(target.name)) { if (sym.kind == 0) { pcode.add("STOG ${sym.addr}") } else { pcode.add("STO ${sym.addr}") } }
             }
         }
