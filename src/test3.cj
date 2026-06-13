@@ -103,7 +103,6 @@ public class SemanticAnalyzer {
             if (child.node_type == NodeType.FuncDecl) { add_symbol(child.name, 2, -1, child.children.size - 1) }
         }
 
-        // 🚨 修复Bug 1：彻底隔离全局变量与 main() 的栈帧，强行垫高栈底！
         for (i in 0..global_addr) {
             pcode.add("LOADI 0")
         }
@@ -230,8 +229,8 @@ public class SemanticAnalyzer {
         else if (node.node_type == NodeType.ReadStat) {
             let target = node.children[0]
             if (target.node_type == NodeType.ArrayAccess) {
-                gen_code(target.children[0]) // 🚨 修复Bug 2.1：向数组读入时，同样要先压入 Offset
-                pcode.add("IN")              // 然后才压入键盘读取的 Value
+                gen_code(target.children[0]) 
+                pcode.add("IN")             
                 if (let Some(sym) <- find_symbol(target.name)) { if (sym.kind == 3) { pcode.add("STOG_ARR ${sym.addr}") } else { pcode.add("STO_ARR ${sym.addr}") } }
             } else {
                 pcode.add("IN") 

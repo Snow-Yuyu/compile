@@ -2,7 +2,6 @@ package compile
 import std.fs.*
 import std.collection.*
 import std.convert.*
-import std.console.*
 
 public struct Instruction {
     public var opt: String; public var operand: Int64
@@ -15,12 +14,11 @@ public class VirtualMachine {
     private var ip: Int64                     
     private var top: Int64                    
     private var base: Int64
-    // ✨ 新增：用于收集虚拟机输入输出内容的缓冲器
     private var output_buffer: ArrayList<String>
 
     public init() {
         this.codes = ArrayList<Instruction>()
-        this.stack = Array<Int64>(10000, { _ => 0 }) // 修复了之前的 Array 初始化报错
+        this.stack = Array<Int64>(10000, { _ => 0 })
         this.ip = 0; this.top = 0; this.base = 0
         this.output_buffer = ArrayList<String>()
     }
@@ -39,10 +37,9 @@ public class VirtualMachine {
         }
     }
 
-    // ✨ 新增参数：接收输出文件的保存路径
     public func run(out_path: String) {
         println("==============================================")
-        println("        🚀 栈式抽象机 (Virtual Machine) 启动        ")
+        println("         栈式抽象机启动        ")
         println("==============================================")
         
         output_buffer.add("=== 栈式抽象机运行结果 ===")
@@ -50,13 +47,11 @@ public class VirtualMachine {
         while (ip < codes.size) {
             let inst = codes[ip]; ip++
             match (inst.opt) {
-                // ---- 局部变量存取 ----
                 case "LOAD" => stack[top] = stack[base + inst.operand]; top++
                 case "STO" => top--; stack[base + inst.operand] = stack[top]
                 case "LOAD_ARR" => top--; let offset = stack[top]; stack[top] = stack[base + inst.operand + offset]; top++
                 case "STO_ARR" => top--; let val = stack[top]; top--; let offset = stack[top]; stack[base + inst.operand + offset] = val
                 
-                // ---- 全局变量存取 ----
                 case "LOADG" => stack[top] = stack[inst.operand]; top++
                 case "STOG" => top--; stack[inst.operand] = stack[top]
                 case "LOADG_ARR" => top--; let offset = stack[top]; stack[top] = stack[inst.operand + offset]; top++
@@ -85,11 +80,10 @@ public class VirtualMachine {
                     let rv = stack[top - 1]; ip = stack[base + 1]; let prev_base = stack[base] 
                     top = base - inst.operand; stack[top] = rv; top++; base = prev_base
                     
-                // ✨ IO 交互：同时在控制台打印并记录进缓冲器
                 case "IN" => 
                     print(">> (等待输入) 请输入整数: ")
-                    let input_str = Console.stdIn.readln().getOrThrow()
-                    let input_val = Int64.parse(input_str) // 修复了 trim 报错
+                    let input_str = readln()
+                    let input_val = Int64.parse(input_str) 
                     stack[top] = input_val; top++
                     output_buffer.add(">> 用户输入: ${input_val}")
 
@@ -101,7 +95,7 @@ public class VirtualMachine {
 
                 case "STOP" => 
                     println("==============================================")
-                    break // 跳出 while 循环，准备写文件
+                    break 
 
                 case _ => 
                     let err_msg = "[VM 崩溃] 未知指令: ${inst.opt}"
@@ -110,7 +104,6 @@ public class VirtualMachine {
             }
         }
         
-        // 虚拟机停机后，将收集到的所有记录写入物理文件
         write_output_file(out_path)
     }
 

@@ -23,7 +23,6 @@
       "requires": [],
       "std-requires": [
         "std.collection",
-        "std.console",
         "std.convert",
         "std.fs"
       ],

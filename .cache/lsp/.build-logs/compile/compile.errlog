@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 warning[0m: unused import 'std.console.*'
  ==> D:\Astudy\code\compile\src\test1.cj:2:1:
   | 
@@ -15,3 +16,38 @@ warning[0m: unused variable:'args'
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 2 warnings generated, 2 warnings printed.
+=======
+warning[0m: unused variable:'i'
+   ==> D:\Astudy\code\compile\src\test3.cj:106:14:
+    | 
+106 |         for (i in 0..global_addr) {
+    |              ^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:226:40:
+    | 
+226 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
+    |                                        ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:302:36:
+    | 
+302 |     private func term(tok: String, assert!: Bool = true): Bool {
+    |                                    ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+warning[0m: unused variable:'assert'
+   ==> D:\Astudy\code\compile\src\test2.cj:306:37:
+    | 
+306 |     private func cat(lexeme: Int64, assert!: Bool = true): Bool {
+    |                                     ^^^^^^ unused variable
+    | 
+    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
+
+4 warnings generated, 4 warnings printed.
+>>>>>>> 9afc3c5 (代码整合)

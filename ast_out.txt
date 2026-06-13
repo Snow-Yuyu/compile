@@ -1,98 +1,112 @@
 Program <1>
-├── Block ['MultiDecl'] <6>
-│   ├── VarDecl ['global_flag'] <6>
-│   │   └── Number ['1'] <6>
-│   └── VarDecl ['global_count'] <6>
-│       └── Number ['0'] <6>
-├── Block ['MultiDecl'] <7>
-│   └── ArrayDecl ['arr'] <7>
-│       └── Number ['5'] <7>
-├── FuncDecl ['calc_sum'] <11>
-│   ├── Identifier ['x'] <11>
-│   ├── Identifier ['y'] <11>
-│   └── Block <11>
-│       ├── Block ['MultiDecl'] <12>
-│       │   └── VarDecl ['temp'] <12>
-│       │       └── BinOp ['+'] <12>
-│       │           ├── Identifier ['x'] <12>
-│       │           └── Identifier ['y'] <12>
+├── Block ['MultiDecl'] <2>
+│   ├── VarDecl ['global_flag'] <2>
+│   │   └── Number ['1'] <2>
+│   └── VarDecl ['global_count'] <2>
+│       └── Number ['0'] <2>
+├── Block ['MultiDecl'] <3>
+│   └── ArrayDecl ['arr'] <3>
+│       └── Number ['5'] <3>
+├── FuncDecl ['calc_sum'] <6>
+│   ├── Identifier ['x'] <6>
+│   ├── Identifier ['y'] <6>
+│   └── Block <6>
+│       ├── Block ['MultiDecl'] <7>
+│       │   └── VarDecl ['temp'] <7>
+│       │       └── BinOp ['+'] <7>
+│       │           ├── Identifier ['x'] <7>
+│       │           └── Identifier ['y'] <7>
+│       ├── ArrayAssign ['='] <10>
+│       │   ├── ArrayAccess ['arr'] <10>
+│       │   │   └── Number ['3'] <10>
+│       │   └── Identifier ['temp'] <10>
+│       ├── ArrayAssign ['='] <11>
+│       │   ├── ArrayAccess ['arr'] <11>
+│       │   │   └── Number ['4'] <11>
+│       │   └── Number ['999'] <11>
 │       └── ReturnStat <13>
 │           └── Identifier ['temp'] <13>
 ├── FuncDecl ['test_switch'] <17>
 │   ├── Identifier ['val'] <17>
 │   └── Block <17>
-│       ├── SwitchStat <19>
-│       │   ├── Identifier ['val'] <19>
+│       ├── SwitchStat <18>
+│       │   ├── Identifier ['val'] <18>
+│       │   ├── CaseStat <19>
+│       │   │   ├── Number ['1'] <19>
+│       │   │   └── Block <19>
+│       │   │       └── WriteStat <19>
+│       │   │           └── Number ['111'] <19>
 │       │   ├── CaseStat <20>
-│       │   │   ├── Number ['1'] <20>
+│       │   │   ├── Number ['2'] <20>
 │       │   │   └── Block <20>
-│       │   │       └── WriteStat <21>
-│       │   │           └── Number ['111'] <21>
-│       │   ├── CaseStat <22>
-│       │   │   ├── Number ['2'] <22>
-│       │   │   └── Block <22>
-│       │   │       └── WriteStat <23>
-│       │   │           └── Number ['222'] <23>
-│       │   └── Block ['default'] <24>
-│       │       └── WriteStat <25>
-│       │           └── Number ['999'] <25>
-│       └── ReturnStat <27>
-│           └── Number ['0'] <27>
-└── FuncDecl ['main'] <31>
-    └── Block <31>
-        ├── Block ['MultiDecl'] <33>
-        │   ├── VarDecl ['a'] <33>
-        │   │   └── Number ['10'] <33>
-        │   ├── VarDecl ['b'] <33>
-        │   │   └── Number ['20'] <33>
-        │   └── VarDecl ['temp'] <33>
-        │       └── Number ['99'] <33>
+│       │   │       └── WriteStat <20>
+│       │   │           └── Number ['222'] <20>
+│       │   └── Block ['default'] <21>
+│       │       └── WriteStat <21>
+│       │           └── Number ['999'] <21>
+│       └── ReturnStat <23>
+│           └── Number ['0'] <23>
+└── FuncDecl ['main'] <27>
+    └── Block <27>
+        ├── Block ['MultiDecl'] <28>
+        │   ├── VarDecl ['a'] <28>
+        │   │   └── Number ['10'] <28>
+        │   ├── VarDecl ['b'] <28>
+        │   │   └── Number ['20'] <28>
+        │   └── VarDecl ['temp'] <28>
+        │       └── Number ['99'] <28>
+        ├── WriteStat <31>
+        │   └── Number ['888888'] <31>
+        ├── Block ['MultiDecl'] <32>
+        │   └── VarDecl ['sum'] <32>
+        │       └── FuncCall ['calc_sum'] <32>
+        │           ├── Identifier ['a'] <32>
+        │           └── Identifier ['b'] <32>
+        ├── WriteStat <33>
+        │   └── Identifier ['sum'] <33>
         ├── WriteStat <36>
         │   └── Number ['888888'] <36>
-        ├── Block ['MultiDecl'] <37>
-        │   └── VarDecl ['sum'] <37>
-        │       └── FuncCall ['calc_sum'] <37>
-        │           ├── Identifier ['a'] <37>
-        │           └── Identifier ['b'] <37>
+        ├── WriteStat <37>
+        │   └── ArrayAccess ['arr'] <37>
+        │       └── Number ['3'] <37>
         ├── WriteStat <38>
-        │   └── Identifier ['sum'] <38>
+        │   └── ArrayAccess ['arr'] <38>
+        │       └── Number ['4'] <38>
         ├── WriteStat <41>
         │   └── Number ['888888'] <41>
         ├── Block ['MultiDecl'] <42>
         │   └── VarDecl ['i'] <42>
         │       └── Number ['0'] <42>
-        ├── DoWhileStat <44>
-        │   ├── Block <44>
-        │   │   ├── ArrayAssign ['='] <45>
-        │   │   │   ├── ArrayAccess ['arr'] <45>
-        │   │   │   │   └── Identifier ['i'] <45>
-        │   │   │   └── BinOp ['*'] <45>
-        │   │   │       ├── Identifier ['i'] <45>
-        │   │   │       └── Number ['10'] <45>
-        │   │   └── Assign ['='] <46>
-        │   │       ├── Identifier ['i'] <46>
-        │   │       └── BinOp ['+'] <46>
-        │   │           ├── Identifier ['i'] <46>
-        │   │           └── Number ['1'] <46>
-        │   └── BinOp ['<'] <47>
-        │       ├── Identifier ['i'] <47>
-        │       └── Number ['3'] <47>
+        ├── DoWhileStat <43>
+        │   ├── Block <43>
+        │   │   ├── ArrayAssign ['='] <44>
+        │   │   │   ├── ArrayAccess ['arr'] <44>
+        │   │   │   │   └── Identifier ['i'] <44>
+        │   │   │   └── BinOp ['*'] <44>
+        │   │   │       ├── Identifier ['i'] <44>
+        │   │   │       └── Number ['10'] <44>
+        │   │   └── Assign ['='] <45>
+        │   │       ├── Identifier ['i'] <45>
+        │   │       └── BinOp ['+'] <45>
+        │   │           ├── Identifier ['i'] <45>
+        │   │           └── Number ['1'] <45>
+        │   └── BinOp ['<'] <46>
+        │       ├── Identifier ['i'] <46>
+        │       └── Number ['3'] <46>
+        ├── WriteStat <48>
+        │   └── ArrayAccess ['arr'] <48>
+        │       └── Number ['0'] <48>
         ├── WriteStat <49>
         │   └── ArrayAccess ['arr'] <49>
-        │       └── Number ['0'] <49>
+        │       └── Number ['1'] <49>
         ├── WriteStat <50>
         │   └── ArrayAccess ['arr'] <50>
-        │       └── Number ['1'] <50>
-        ├── WriteStat <51>
-        │   └── ArrayAccess ['arr'] <51>
-        │       └── Number ['2'] <51>
-        ├── WriteStat <54>
-        │   └── Number ['888888'] <54>
-        ├── FuncCall ['test_switch'] <55>
-        │   └── Number ['2'] <55>
-        ├── FuncCall ['test_switch'] <56>
-        │   └── Number ['5'] <56>
-        ├── WriteStat <59>
-        │   └── Number ['888888'] <59>
-        └── WriteStat <60>
-            └── Identifier ['temp'] <60>
+        │       └── Number ['2'] <50>
+        ├── WriteStat <53>
+        │   └── Number ['888888'] <53>
+        ├── FuncCall ['test_switch'] <54>
+        │   └── Number ['2'] <54>
+        ├── WriteStat <57>
+        │   └── Number ['888888'] <57>
+        └── WriteStat <58>
+            └── Identifier ['temp'] <58>

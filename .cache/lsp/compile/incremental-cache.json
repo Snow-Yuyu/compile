@@ -2,8 +2,13 @@
   "packageInformation": {
     "compile": {
       "rootPackageName": "compile",
+<<<<<<< HEAD
       "fileNameHash": "-7047780326830174602",
       "timeStamp": 1781333130,
+=======
+      "fileNameHash": "-5878389962576549990",
+      "timeStamp": 1781077010,
+>>>>>>> 9afc3c5 (代码整合)
       "isBuilt": true,
       "exeName": "main",
       "hasSubPkgs": false

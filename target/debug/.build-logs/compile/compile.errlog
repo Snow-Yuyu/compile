@@ -1,49 +1,17 @@
-warning[0m: unsecure character:\u{FE0F}
-   ==> D:\Astudy\code\compile\src\test1.cj:270:30:
-    | 
-270 |         println("  └─ ⚠️ 警告：语法阶段发现 ${myParser.error_cnt} 处结构错误，已启动恐慌模式带伤建树。")
-    |                        ^ unsecure character:\u{FE0F}
-    | 
-    # note: this warning can be suppressed by setting the compiler option `-Woff parser`
-
-warning[0m: unused import 'std.console.*'
- ==> D:\Astudy\code\compile\src\test1.cj:3:1:
-  | 
-3 | import std.console.*
-  | ^^^^^^^^^^^^^^^^^^^^ unused import
-  | 
-  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-warning[0m: unused import 'std.collection.*'
- ==> D:\Astudy\code\compile\src\test1.cj:4:1:
-  | 
-4 | import std.collection.*
-  | ^^^^^^^^^^^^^^^^^^^^^^^ unused import
-  | 
-  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
-warning[0m: unused import 'std.convert.*'
- ==> D:\Astudy\code\compile\src\test3.cj:5:1:
-  | 
-5 | import std.convert.*
-  | ^^^^^^^^^^^^^^^^^^^^ unused import
-  | 
-  # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
 warning[0m: unused variable:'e'
-  ==> D:\Astudy\code\compile\src\test1.cj:32:18:
+  ==> D:\Astudy\code\compile\src\test1.cj:30:18:
    | 
-32 |         } catch (e: Exception) {
+30 |         } catch (e: Exception) {
    |                  ^ unused variable
    | 
    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 warning[0m: unused variable:'assert'
-   ==> D:\Astudy\code\compile\src\test2.cj:262:40:
+   ==> D:\Astudy\code\compile\src\test2.cj:253:40:
     | 
-262 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
+253 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
     |                                        ^^^^^^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-6 warnings generated, 6 warnings printed.
+2 warnings generated, 2 warnings printed.

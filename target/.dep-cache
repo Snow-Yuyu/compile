@@ -5,7 +5,7 @@
       "package": "compile",
       "isMacro": false,
       "accessLevel": "public",
-      "timeStamp": 1781335737,
+      "timeStamp": 1781336258,
       "dependencies": [],
       "std-dependencies": [
         {
@@ -19,16 +19,6 @@
             {
               "file": "D:\\Astudy\\code\\compile\\src\\test3.cj"
             },
-            {
-              "file": "D:\\Astudy\\code\\compile\\src\\test4.cj"
-            }
-          ]
-        },
-        {
-          "orPackage": "",
-          "package": "std.console",
-          "isStd": true,
-          "imports": [
             {
               "file": "D:\\Astudy\\code\\compile\\src\\test4.cj"
             }

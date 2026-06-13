@@ -1,49 +1,33 @@
-warning[0m: class 'Console' is deprecated. Use related global functions in the std.env instead.
-  ==> D:\Astudy\code\compile\src\test4.cj:91:37:
-   | 
-91 |                     let input_str = Console.stdIn.readln().getOrThrow()
-   |                                     ^^^^^^^ deprecated
-   | 
-   # note: this warning can be suppressed by setting the compiler option `-Woff deprecated`
-
 warning[0m: unused variable:'i'
-   ==> D:\Astudy\code\compile\src\test3.cj:107:14:
+   ==> D:\Astudy\code\compile\src\test3.cj:106:14:
     | 
-107 |         for (i in 0..global_addr) {
+106 |         for (i in 0..global_addr) {
     |              ^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-warning[0m: unused variable:'save'
-   ==> D:\Astudy\code\compile\src\test2.cj:130:13:
-    | 
-130 |         var save = pointer
-    |             ^^^^ unused variable
-    | 
-    # note: this warning can be suppressed by setting the compiler option `-Woff unused`
-
 warning[0m: unused variable:'assert'
-   ==> D:\Astudy\code\compile\src\test2.cj:229:40:
+   ==> D:\Astudy\code\compile\src\test2.cj:226:40:
     | 
-229 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
+226 |     private func parse_expression_stat(assert!: Bool = true): ASTNode {
     |                                        ^^^^^^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 warning[0m: unused variable:'assert'
-   ==> D:\Astudy\code\compile\src\test2.cj:305:36:
+   ==> D:\Astudy\code\compile\src\test2.cj:302:36:
     | 
-305 |     private func term(tok: String, assert!: Bool = true): Bool {
+302 |     private func term(tok: String, assert!: Bool = true): Bool {
     |                                    ^^^^^^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
 warning[0m: unused variable:'assert'
-   ==> D:\Astudy\code\compile\src\test2.cj:309:37:
+   ==> D:\Astudy\code\compile\src\test2.cj:306:37:
     | 
-309 |     private func cat(lexeme: Int64, assert!: Bool = true): Bool {
+306 |     private func cat(lexeme: Int64, assert!: Bool = true): Bool {
     |                                     ^^^^^^ unused variable
     | 
     # note: this warning can be suppressed by setting the compiler option `-Woff unused`
 
-6 warnings generated, 6 warnings printed.
+4 warnings generated, 4 warnings printed.

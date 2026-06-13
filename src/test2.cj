@@ -71,10 +71,8 @@ public class parser2 {
     private func parse_program(): ASTNode {
         var root = ASTNode(NodeType.Program, line: 1)
         while (pointer < token_cnt) {
-            var save = pointer
             var decl = parse_func_decl(assert: false)
             if (!is_err(decl)) { root.children.add(decl); continue }
-            pointer = save
             decl = parse_declaration_stat(assert: false)
             if (!is_err(decl)) { root.children.add(decl); continue }
             break // 遇到无法解析的直接结束
@@ -127,7 +125,6 @@ public class parser2 {
 
     // ✨ 增强的声明：支持 var a=1, b=2
     private func parse_declaration_stat(assert!: Bool = true): ASTNode {
-        var save = pointer
         if(!term("var", assert: assert)){ return ASTNode(NodeType.ErrorNode) }
         var block_node = ASTNode(NodeType.Block, name: "MultiDecl", line: get_ln())
         
